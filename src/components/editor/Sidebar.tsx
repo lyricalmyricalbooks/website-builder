@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react';
 import { 
   Plus, Layers, Palette, Code2, Trash2, Copy, LayoutGrid, 
   Type, Image, PlaySquare, ShoppingBag, Sparkles, Layers3,
-  Compass, Link as LinkIcon, Globe, Settings
+  Compass, Link as LinkIcon, Globe
 } from 'lucide-react';
 import { PageLayout, Section, Block, ThemeSettings, NavigationLink } from '@/types/editor';
 import { transpileTypeScript } from '@/lib/compiler';
@@ -177,6 +177,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {link.children && link.children.length > 0 && renderNavLinksTree(link.children, depth + 1)}
       </div>
     ));
+  };
+
+  // Parsing helper for group backgrounds
+  const parseGroupBackground = () => {
+    if (!selectedBlock || selectedBlock.type !== 'group') return { isGradient: false, color1: '#3b82f6', color2: '#1d4ed8', angle: 135, solidColor: '#ffffff' };
+    const bg = selectedBlock.settings.backgroundColor || 'transparent';
+    const isGradient = bg.startsWith('linear-gradient');
+    
+    let color1 = '#3b82f6';
+    let color2 = '#1d4ed8';
+    let angle = 135;
+    let solidColor = '#ffffff';
+
+    if (isGradient) {
+      const match = bg.match(/linear-gradient\((\d+)deg,\s*([^,]+),\s*([^)]+)\)/);
+      if (match) {
+        angle = parseInt(match[1]) || 135;
+        color1 = match[2].trim();
+        color2 = match[3].trim();
+      }
+    } else if (bg !== 'transparent') {
+      solidColor = bg;
+    }
+
+    return { isGradient, color1, color2, angle, solidColor };
+  };
+
+  const { isGradient, color1, color2, angle, solidColor } = parseGroupBackground();
+
+  const handleBgTypeChange = (type: 'solid' | 'gradient') => {
+    if (type === 'solid') {
+      updateBlockSettings(selectedBlock!.id, { backgroundColor: solidColor });
+    } else {
+      updateBlockSettings(selectedBlock!.id, { backgroundColor: `linear-gradient(${angle}deg, ${color1}, ${color2})` });
+    }
+  };
+
+  const handleSolidColorChange = (val: string) => {
+    updateBlockSettings(selectedBlock!.id, { backgroundColor: val });
+  };
+
+  const handleGradientChange = (c1: string, c2: string, ang: number) => {
+    updateBlockSettings(selectedBlock!.id, { backgroundColor: `linear-gradient(${ang}deg, ${c1}, ${c2})` });
   };
 
   return (
@@ -679,14 +722,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {selectedBlock.type === 'text' && (
                 <div className="space-y-3">
                   <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Text Settings</h5>
-                  <div>
-                    <label className="text-[9px] text-slate-500 block">Content (HTML)</label>
-                    <textarea
-                      value={selectedBlock.settings.content || ''}
-                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { content: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none h-16 font-mono"
-                    />
-                  </div>
+                  <p className="text-[10px] text-slate-450 italic bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">
+                    💡 Double-click the text on the canvas to edit inline.
+                  </p>
                   <div>
                     <label className="text-[9px] text-slate-500 block">Text Size</label>
                     <select
@@ -860,16 +898,80 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {selectedBlock.type === 'group' && (
                 <div className="space-y-3">
                   <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Container Card Settings</h5>
-                  <div>
-                    <label className="text-[9px] text-slate-500 block">Background Color/Gradient</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. #1e1e2f or linear-gradient(...)"
-                      value={selectedBlock.settings.backgroundColor || ''}
-                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { backgroundColor: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
-                    />
+                  
+                  {/* Visual Background Controller (Solid vs Gradient) */}
+                  <div className="bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[9px] text-slate-400 font-bold uppercase">Background Type</label>
+                      <div className="flex bg-slate-950 p-0.5 rounded border border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => handleBgTypeChange('solid')}
+                          className={`px-2 py-0.5 rounded text-[9px] font-bold ${!isGradient ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                        >
+                          Solid
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleBgTypeChange('gradient')}
+                          className={`px-2 py-0.5 rounded text-[9px] font-bold ${isGradient ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                        >
+                          Gradient
+                        </button>
+                      </div>
+                    </div>
+
+                    {!isGradient ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] text-slate-500">Color</span>
+                        <div className="flex items-center space-x-1.5">
+                          <input
+                            type="color"
+                            value={solidColor.startsWith('#') ? solidColor : '#ffffff'}
+                            onChange={(e) => handleSolidColorChange(e.target.value)}
+                            className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                          />
+                          <span className="text-[9px] font-mono text-slate-400 uppercase">{solidColor}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 pt-1 border-t border-slate-800/60">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-slate-500">Start Color</span>
+                          <input
+                            type="color"
+                            value={color1.startsWith('#') ? color1 : '#3b82f6'}
+                            onChange={(e) => handleGradientChange(e.target.value, color2, angle)}
+                            className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-slate-500">End Color</span>
+                          <input
+                            type="color"
+                            value={color2.startsWith('#') ? color2 : '#1d4ed8'}
+                            onChange={(e) => handleGradientChange(color1, e.target.value, angle)}
+                            className="w-5 h-5 border-0 rounded cursor-pointer bg-transparent"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-[9px] text-slate-500 mb-0.5">
+                            <span>Angle</span>
+                            <span>{angle}°</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            value={angle}
+                            onChange={(e) => handleGradientChange(color1, color2, parseInt(e.target.value))}
+                            className="w-full accent-blue-500 bg-slate-850 h-1 rounded"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
+
                   <div>
                     <label className="text-[9px] text-slate-500 block">Inner Padding</label>
                     <select

@@ -172,6 +172,7 @@ export default function EditorPage() {
           selectedSectionId={selectedSectionId}
           setSelectedSectionId={setSelectedSectionId}
           updateBlockPosition={updateBlockPosition}
+          updateBlockSettings={updateBlockSettings}
           zoom={zoom}
           pan={pan}
           setPan={setPan}

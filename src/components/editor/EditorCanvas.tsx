@@ -16,6 +16,7 @@ interface EditorCanvasProps {
   selectedSectionId: string | null;
   setSelectedSectionId: (id: string | null) => void;
   updateBlockPosition: (blockId: string, position: Partial<GridPosition>) => void;
+  updateBlockSettings: (blockId: string, settings: Record<string, any>) => void;
   zoom: number;
   pan: { x: number; y: number };
   setPan: (pan: { x: number; y: number }) => void;
@@ -41,6 +42,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   selectedSectionId,
   setSelectedSectionId,
   updateBlockPosition,
+  updateBlockSettings,
   zoom,
   pan,
   setPan,
@@ -68,6 +70,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   // Key state for Alt key (distance measurement)
   const [altPressed, setAltPressed] = useState(false);
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
+
+  // WYSIWYG text editing state
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -216,6 +221,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   // Render a single block inside the editor canvas
   const renderBlock = (block: Block, sectionId: string) => {
     const isSelected = selectedBlockId === block.id;
+    const isEditingText = editingBlockId === block.id;
     const pos = breakpoint === 'mobile' ? block.position.mobile : block.position.desktop;
 
     const blockStyle: React.CSSProperties = {
@@ -229,9 +235,71 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       height: '100%',
     };
 
+    // Render group block with styles
+    const renderGroupBlock = () => {
+      const {
+        backgroundColor = 'transparent',
+        padding = 'p-0',
+        borderRadius = 'rounded-none',
+        shadow = 'shadow-none',
+        backdropBlur = 'backdrop-blur-none',
+        borderColor = 'transparent',
+        borderWidth = 'border-0',
+      } = block.settings;
+
+      const isHexBg = backgroundColor.startsWith('#') || backgroundColor.startsWith('rgb') || backgroundColor.startsWith('rgba') || backgroundColor.startsWith('var') || backgroundColor.startsWith('linear-gradient');
+      const groupStyle: React.CSSProperties = {
+        background: isHexBg ? backgroundColor : undefined,
+        borderColor: borderColor !== 'transparent' ? borderColor : undefined,
+        borderStyle: borderWidth !== 'border-0' ? 'solid' : undefined,
+      };
+
+      return (
+        <div
+          className={`w-full h-full ${padding} ${borderRadius} ${shadow} ${backdropBlur} ${borderWidth} ${
+            !isHexBg && backgroundColor !== 'transparent' ? backgroundColor : ''
+          }`}
+          style={groupStyle}
+        >
+          <div className="absolute inset-0 border border-dashed border-slate-800/30 pointer-events-none rounded-inherit" />
+        </div>
+      );
+    };
+
     const renderContent = () => {
       switch (block.type) {
         case 'text':
+          if (isEditingText) {
+            // Inline WYSIWYG text editor
+            const alignment = block.settings.alignment || 'text-left';
+            const fontSize = block.settings.fontSize || 'text-base';
+            const fontWeight = block.settings.fontWeight || 'font-normal';
+            const lineHeight = block.settings.lineHeight || 'leading-relaxed';
+            const letterSpacing = block.settings.letterSpacing || 'tracking-normal';
+            const textTransform = block.settings.textTransform || 'normal-case';
+            const isHexColor = block.settings.color && (block.settings.color.startsWith('#') || block.settings.color.startsWith('rgb'));
+
+            return (
+              <div 
+                className={`w-full h-full p-2 outline-none pointer-events-auto select-text ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${letterSpacing} ${textTransform}`}
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  updateBlockSettings(block.id, { content: e.currentTarget.innerHTML });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    e.currentTarget.blur();
+                    setEditingBlockId(null);
+                  }
+                }}
+                style={{
+                  color: isHexColor ? block.settings.color : undefined,
+                }}
+                dangerouslySetInnerHTML={{ __html: block.settings.content || '' }}
+              />
+            );
+          }
           return <TextBlock settings={block.settings} theme={layout.theme} />;
         case 'image':
           return <ImageBlock settings={block.settings} />;
@@ -241,6 +309,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
           return <ProductCardBlock settings={block.settings} theme={layout.theme} />;
         case 'search':
           return <SearchBlock settings={block.settings} />;
+        case 'group':
+          return renderGroupBlock();
         case 'custom':
           return (
             <div className="w-full h-full p-4 border border-blue-500/20 bg-blue-500/5 text-blue-500 rounded-lg flex flex-col justify-between">
@@ -259,6 +329,12 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         style={blockStyle}
         onMouseEnter={() => setHoveredBlockId(block.id)}
         onMouseLeave={() => setHoveredBlockId(null)}
+        onDoubleClick={(e) => {
+          if (block.type === 'text') {
+            e.stopPropagation();
+            setEditingBlockId(block.id);
+          }
+        }}
         onClick={(e) => {
           e.stopPropagation();
           setSelectedBlockId(block.id);
@@ -273,10 +349,12 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         }`}
       >
         {/* Drag Handle Overlay */}
-        <div
-          onMouseDown={(e) => handleInteractionStart(e, block, sectionId, 'move')}
-          className="absolute inset-0 z-0 bg-transparent"
-        />
+        {!isEditingText && (
+          <div
+            onMouseDown={(e) => handleInteractionStart(e, block, sectionId, 'move')}
+            className="absolute inset-0 z-0 bg-transparent"
+          />
+        )}
 
         {/* Actual block content */}
         <div className="relative z-10 w-full h-full pointer-events-none">
@@ -284,7 +362,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         </div>
 
         {/* Selection Outlines and Resize Handles */}
-        {isSelected && (
+        {isSelected && !isEditingText && (
           <>
             {/* Top-Left Coordinate indicator */}
             <div className="absolute -top-6 left-0 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm font-mono z-30 pointer-events-none">
@@ -307,6 +385,81 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               className="absolute right-0 bottom-0 w-3 h-3 cursor-nwse-resize bg-blue-600 border border-white rounded-full shadow-sm z-30"
             />
           </>
+        )}
+
+        {/* Floating formatting toolbar for inline text editor */}
+        {isEditingText && (
+          <div className="absolute -top-12 left-0 bg-slate-900 border border-slate-750 text-slate-100 p-1.5 rounded-xl shadow-2xl flex items-center space-x-1.5 z-40 select-none pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => document.execCommand('bold')}
+              className="p-1 hover:bg-slate-800 rounded font-bold text-xs w-6 h-6 flex items-center justify-center"
+              title="Bold"
+            >
+              B
+            </button>
+            <button
+              type="button"
+              onClick={() => document.execCommand('italic')}
+              className="p-1 hover:bg-slate-800 rounded italic text-xs w-6 h-6 flex items-center justify-center"
+              title="Italic"
+            >
+              I
+            </button>
+            <button
+              type="button"
+              onClick={() => document.execCommand('underline')}
+              className="p-1 hover:bg-slate-800 rounded underline text-xs w-6 h-6 flex items-center justify-center"
+              title="Underline"
+            >
+              U
+            </button>
+            <div className="w-px h-4 bg-slate-800" />
+            <button
+              type="button"
+              onClick={() => updateBlockSettings(block.id, { alignment: 'text-left' })}
+              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              title="Align Left"
+            >
+              Left
+            </button>
+            <button
+              type="button"
+              onClick={() => updateBlockSettings(block.id, { alignment: 'text-center' })}
+              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              title="Align Center"
+            >
+              Center
+            </button>
+            <button
+              type="button"
+              onClick={() => updateBlockSettings(block.id, { alignment: 'text-right' })}
+              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              title="Align Right"
+            >
+              Right
+            </button>
+            <div className="w-px h-4 bg-slate-800" />
+            <select
+              value={block.settings.fontSize || 'text-base'}
+              onChange={(e) => updateBlockSettings(block.id, { fontSize: e.target.value })}
+              className="bg-slate-950 border border-slate-800 text-[10px] rounded px-1.5 py-0.5 text-slate-200 focus:outline-none"
+            >
+              <option value="text-sm">Small</option>
+              <option value="text-base">Body</option>
+              <option value="text-xl">H3</option>
+              <option value="text-3xl">H2</option>
+              <option value="text-5xl">H1</option>
+            </select>
+            <div className="w-px h-4 bg-slate-800" />
+            <button
+              type="button"
+              onClick={() => setEditingBlockId(null)}
+              className="px-1.5 py-0.5 bg-blue-600 hover:bg-blue-500 rounded text-[9px] font-bold text-white"
+            >
+              Done
+            </button>
+          </div>
         )}
 
         {/* Distance measurement guides (Alt hover) */}
@@ -414,7 +567,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       {/* Rulers Overlay */}
       <div className="absolute top-0 left-0 right-0 h-4 bg-slate-800 border-b border-slate-700 flex text-[9px] text-slate-400 select-none pointer-events-none">
         <div className="w-4 h-full border-r border-slate-700 bg-slate-900" />
-        {Array.from({ length: 24 }).map((_, i) => (
+        {Array.from({ length: cols }).map((_, i) => (
           <div key={i} className="flex-grow border-r border-slate-700/50 text-center py-0.5">
             Col {i + 1}
           </div>
