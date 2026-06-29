@@ -29,18 +29,18 @@ const INITIAL_NAV: NavigationLink[] = [
   { 
     id: 'nav_products', 
     label: 'Products', 
-    url: '/products',
+    url: '#products',
     children: [
-      { id: 'nav_all', label: 'All Products', url: '/products' },
-      { id: 'nav_books', label: 'Books', url: '/category/books' },
-      { id: 'nav_zines', label: 'Zines', url: '/category/zines' },
+      { id: 'nav_all', label: 'All Products', url: '#products' },
+      { id: 'nav_books', label: 'Books', url: '#products' },
+      { id: 'nav_zines', label: 'Zines', url: '#products' },
     ]
   },
-  { id: 'nav_about', label: 'About', url: '/about' },
-  { id: 'nav_submissions', label: 'Submissions', url: '/submissions' },
-  { id: 'nav_opencall', label: 'Open Call', url: '/open-call-collective-book' },
-  { id: 'nav_roots', label: 'History', url: '/roots' },
-  { id: 'nav_contact', label: 'Contact', url: '/contact' },
+  { id: 'nav_about', label: 'About', url: '#about' },
+  { id: 'nav_submissions', label: 'Submissions', url: '#submissions' },
+  { id: 'nav_opencall', label: 'Open Call', url: '#opencall' },
+  { id: 'nav_roots', label: 'History', url: '#roots' },
+  { id: 'nav_contact', label: 'Contact', url: '#contact' },
 ];
 
 // Global Shared Sections
@@ -85,7 +85,7 @@ const GLOBAL_HEADER: Section = {
       id: 'blk_logo',
       type: 'text',
       settings: {
-        content: '<span class="font-bold text-lg uppercase tracking-widest text-white">Lyricalmyrical<b>Books</b></span>',
+        content: '<a href="#home" class="font-bold text-lg uppercase tracking-widest text-white">Lyricalmyrical<b>Books</b></a>',
         fontSize: 'text-lg',
         color: '#F9F9F9',
       },
@@ -281,6 +281,374 @@ const INITIAL_PAGES: Record<string, Page> = {
         ],
       },
       GLOBAL_FOOTER
+    ]
+  },
+  'grain-archive': {
+    id: 'grain-archive',
+    name: 'Grain Archive (Template)',
+    slug: '#grain-archive',
+    type: 'system',
+    sections: [
+      {
+        id: 'grain_announce',
+        type: 'announcement',
+        isGlobal: false,
+        settings: {
+          backgroundColor: '#000000',
+          paddingY: 'py-2',
+          textColor: '#ffffff',
+        },
+        blocks: [
+          {
+            id: 'grain_ann_text',
+            type: 'text',
+            settings: {
+              content: '<p class="text-center text-[10px] tracking-widest uppercase">Independent writing on music, film, and visual culture—one deep cut at a time.</p>',
+              fontSize: 'text-xs',
+              alignment: 'text-center',
+              color: '#ffffff',
+            },
+            position: {
+              desktop: { x_start: 1, y_start: 1, x_end: 25, y_end: 2, z_index: 1 },
+              mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 2, z_index: 1 },
+            }
+          }
+        ]
+      },
+      {
+        id: 'sec_grain_hero',
+        type: 'hero',
+        settings: {
+          backgroundColor: '#000000',
+          paddingY: 'py-0',
+          textColor: '#ffffff',
+        },
+        blocks: [
+          {
+            id: 'grain_hero_img',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1600',
+              alt: 'Grain Archive Portrait',
+              objectFit: 'cover',
+              overlayColor: 'rgba(249, 115, 22, 0.55)', // Orange tint
+              borderRadius: 'rounded-none',
+            },
+            position: {
+              desktop: { x_start: 1, y_start: 1, x_end: 25, y_end: 15, z_index: 1 },
+              mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 12, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_logo_badge',
+            type: 'group',
+            settings: {
+              backgroundColor: '#ffffff',
+              borderRadius: 'rounded-full',
+              padding: 'p-0',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 2, x_end: 3, y_end: 3, z_index: 10 },
+              mobile: { x_start: 2, y_start: 2, x_end: 3, y_end: 3, z_index: 10 },
+            }
+          },
+          {
+            id: 'grain_logo_text',
+            type: 'text',
+            settings: {
+              content: '<span class="font-bold text-[10px] text-black">G•A</span>',
+              alignment: 'text-center',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 2, x_end: 3, y_end: 3, z_index: 11 },
+              mobile: { x_start: 2, y_start: 2, x_end: 3, y_end: 3, z_index: 11 },
+            }
+          },
+          {
+            id: 'grain_nav_home',
+            type: 'button',
+            settings: {
+              text: 'Home',
+              variant: 'primary',
+            },
+            position: {
+              desktop: { x_start: 18, y_start: 2, x_end: 20, y_end: 3, z_index: 10 },
+              mobile: { x_start: 5, y_start: 2, x_end: 6, y_end: 3, z_index: 10 },
+            }
+          },
+          {
+            id: 'grain_nav_archive',
+            type: 'button',
+            settings: {
+              text: 'Archive',
+              variant: 'secondary',
+            },
+            position: {
+              desktop: { x_start: 20, y_start: 2, x_end: 22, y_end: 3, z_index: 10 },
+              mobile: { x_start: 6, y_start: 2, x_end: 7, y_end: 3, z_index: 10 },
+            }
+          },
+          {
+            id: 'grain_nav_about',
+            type: 'button',
+            settings: {
+              text: 'About',
+              variant: 'outline',
+            },
+            position: {
+              desktop: { x_start: 22, y_start: 2, x_end: 24, y_end: 3, z_index: 10 },
+              mobile: { x_start: 7, y_start: 2, x_end: 8, y_end: 3, z_index: 10 },
+            }
+          },
+          {
+            id: 'grain_title_giant',
+            type: 'text',
+            settings: {
+              content: '<h1 class="text-white text-6xl md:text-8xl font-black tracking-tighter">Grain Archive</h1>',
+              fontSize: 'text-5xl',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 12, x_end: 24, y_end: 15, z_index: 10 },
+              mobile: { x_start: 2, y_start: 10, x_end: 8, y_end: 12, z_index: 10 },
+            }
+          }
+        ]
+      },
+      {
+        id: 'sec_grain_grid',
+        type: 'custom',
+        settings: {
+          backgroundColor: '#000000',
+          paddingY: 'py-6',
+          textColor: '#ffffff',
+        },
+        blocks: [
+          // Card 1 (Left)
+          {
+            id: 'grain_card_img_1',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800',
+              alt: 'Listening to Films That Drift',
+              objectFit: 'cover',
+              borderRadius: 'rounded-xl',
+              hoverEffect: 'scale',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 1, x_end: 13, y_end: 9, z_index: 1 },
+              mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 7, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_card_glass_1',
+            type: 'group',
+            settings: {
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropBlur: 'backdrop-blur-md',
+              borderRadius: 'rounded-xl',
+              padding: 'p-4',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 7, x_end: 13, y_end: 9, z_index: 2 },
+              mobile: { x_start: 1, y_start: 5, x_end: 9, y_end: 7, z_index: 2 },
+            }
+          },
+          {
+            id: 'grain_card_txt_1',
+            type: 'text',
+            settings: {
+              content: '<span class="font-bold text-sm text-white">Listening to Films That Drift</span><br/><span class="text-[10px] text-zinc-300">Film - August 21, 2026</span>',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 7, x_end: 13, y_end: 9, z_index: 3 },
+              mobile: { x_start: 1, y_start: 5, x_end: 9, y_end: 7, z_index: 3 },
+            }
+          },
+          // Card 2 (Right)
+          {
+            id: 'grain_card_img_2',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800',
+              alt: 'Drowning in Delay',
+              objectFit: 'cover',
+              borderRadius: 'rounded-xl',
+              hoverEffect: 'scale',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 1, x_end: 24, y_end: 9, z_index: 1 },
+              mobile: { x_start: 1, y_start: 8, x_end: 9, y_end: 14, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_card_glass_2',
+            type: 'group',
+            settings: {
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropBlur: 'backdrop-blur-md',
+              borderRadius: 'rounded-xl',
+              padding: 'p-4',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 7, x_end: 24, y_end: 9, z_index: 2 },
+              mobile: { x_start: 1, y_start: 12, x_end: 9, y_end: 14, z_index: 2 },
+            }
+          },
+          {
+            id: 'grain_card_txt_2',
+            type: 'text',
+            settings: {
+              content: '<span class="font-bold text-sm text-white">Drowning in Delay: The Revival of Fuzz Worship</span><br/><span class="text-[10px] text-zinc-300">Music - August 6, 2026</span>',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 7, x_end: 24, y_end: 9, z_index: 3 },
+              mobile: { x_start: 1, y_start: 12, x_end: 9, y_end: 14, z_index: 3 },
+            }
+          },
+          // Card 3 (Left Bottom)
+          {
+            id: 'grain_card_img_3',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800',
+              alt: 'Color, Repetition, and the Sound of Soft Things',
+              objectFit: 'cover',
+              borderRadius: 'rounded-xl',
+              hoverEffect: 'scale',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 10, x_end: 13, y_end: 18, z_index: 1 },
+              mobile: { x_start: 1, y_start: 15, x_end: 9, y_end: 21, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_card_glass_3',
+            type: 'group',
+            settings: {
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropBlur: 'backdrop-blur-md',
+              borderRadius: 'rounded-xl',
+              padding: 'p-4',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 16, x_end: 13, y_end: 18, z_index: 2 },
+              mobile: { x_start: 1, y_start: 19, x_end: 9, y_end: 21, z_index: 2 },
+            }
+          },
+          {
+            id: 'grain_card_txt_3',
+            type: 'text',
+            settings: {
+              content: '<span class="font-bold text-sm text-white">Color, Repetition, and the Sound of Soft Things</span><br/><span class="text-[10px] text-zinc-300">Film - July 11, 2026</span>',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 16, x_end: 13, y_end: 18, z_index: 3 },
+              mobile: { x_start: 1, y_start: 19, x_end: 9, y_end: 21, z_index: 3 },
+            }
+          },
+          // Card 4 (Right Bottom)
+          {
+            id: 'grain_card_img_4',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=800',
+              alt: 'Mirrors, Image Loops, and Feedback Logic',
+              objectFit: 'cover',
+              borderRadius: 'rounded-xl',
+              hoverEffect: 'scale',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 10, x_end: 24, y_end: 18, z_index: 1 },
+              mobile: { x_start: 1, y_start: 22, x_end: 9, y_end: 28, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_card_glass_4',
+            type: 'group',
+            settings: {
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              backdropBlur: 'backdrop-blur-md',
+              borderRadius: 'rounded-xl',
+              padding: 'p-4',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 16, x_end: 24, y_end: 18, z_index: 2 },
+              mobile: { x_start: 1, y_start: 26, x_end: 9, y_end: 28, z_index: 2 },
+            }
+          },
+          {
+            id: 'grain_card_txt_4',
+            type: 'text',
+            settings: {
+              content: '<span class="font-bold text-sm text-white">Mirrors, Image Loops, and Feedback Logic of Visual Culture</span><br/><span class="text-[10px] text-zinc-300">Visual - June 24, 2026</span>',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 16, x_end: 24, y_end: 18, z_index: 3 },
+              mobile: { x_start: 1, y_start: 26, x_end: 9, y_end: 28, z_index: 3 },
+            }
+          }
+        ]
+      },
+      {
+        id: 'sec_grain_view_all',
+        type: 'banner',
+        isGlobal: false,
+        settings: {
+          backgroundColor: '#ffffff',
+          paddingY: 'py-6',
+          textColor: '#000000',
+        },
+        blocks: [
+          {
+            id: 'grain_view_all_txt',
+            type: 'text',
+            settings: {
+              content: '<p class="text-center text-4xl font-serif italic text-black">View all</p>',
+              fontFamily: 'font-serif',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 1, x_end: 24, y_end: 3, z_index: 1 },
+              mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 3, z_index: 1 },
+            }
+          }
+        ]
+      },
+      {
+        id: 'sec_grain_featured',
+        type: 'custom',
+        settings: {
+          backgroundColor: '#000000',
+          paddingY: 'py-16',
+          textColor: '#ffffff',
+        },
+        blocks: [
+          {
+            id: 'grain_feat_title',
+            type: 'text',
+            settings: {
+              content: '<h2 class="text-white text-6xl md:text-8xl font-black tracking-tighter leading-none">Featured<br/>Album</h2>',
+            },
+            position: {
+              desktop: { x_start: 2, y_start: 1, x_end: 12, y_end: 8, z_index: 1 },
+              mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 5, z_index: 1 },
+            }
+          },
+          {
+            id: 'grain_feat_img',
+            type: 'image',
+            settings: {
+              src: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
+              alt: 'Featured Album Artwork',
+              objectFit: 'cover',
+              borderRadius: 'rounded-xl',
+            },
+            position: {
+              desktop: { x_start: 13, y_start: 1, x_end: 24, y_end: 11, z_index: 1 },
+              mobile: { x_start: 1, y_start: 6, x_end: 9, y_end: 13, z_index: 1 },
+            }
+          }
+        ]
+      }
     ]
   },
   'products': {
@@ -502,7 +870,7 @@ const INITIAL_PAGES: Record<string, Page> = {
             id: 'chk_form_text',
             type: 'text',
             settings: {
-              content: '<div class="space-y-4 text-xs"><h3 class="text-sm font-semibold text-white mb-2">Shipping Information</h3><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] text-zinc-500 block mb-1">First Name</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" value="Julia" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">Last Name</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /></div></div><div class="mt-3"><label class="text-[10px] text-zinc-500 block mb-1">Street Address</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /></div><div class="grid grid-cols-3 gap-3 mt-3"><div><label class="text-[10px] text-zinc-500 block mb-1">City</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">State/Prov</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">Postal Code</label><input type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /></div></div></div>',
+              content: '<div class="space-y-4 text-xs"><h3 class="text-sm font-semibold text-white mb-2">Shipping Information</h3><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] text-zinc-500 block mb-1">First Name</label><input type="text" class="w-full bg-zinc-900 border border-zinc-805 rounded p-2 text-white" value="Julia" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">Last Name</label><input type="text" class="w-full bg-zinc-900 border border-zinc-805 rounded p-2 text-white" /></div></div><div class="mt-3"><label class="text-[10px] text-zinc-500 block mb-1">Street Address</label><input type="text" class="w-full bg-zinc-900 border border-zinc-805 rounded p-2 text-white" /></div><div class="grid grid-cols-3 gap-3 mt-3"><div><label class="text-[10px] text-zinc-500 block mb-1">City</label><input type="text" class="w-full bg-zinc-900 border border-zinc-805 rounded p-2 text-white" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">State/Prov</label><input type="text" class="w-full bg-zinc-900 border border-zinc-850 rounded p-2 text-white" /></div><div><label class="text-[10px] text-zinc-500 block mb-1">Postal Code</label><input type="text" class="w-full bg-zinc-900 border border-zinc-850 rounded p-2 text-white" /></div></div></div>',
             },
             position: {
               desktop: { x_start: 3, y_start: 4, x_end: 13, y_end: 12, z_index: 2 },
@@ -528,7 +896,7 @@ const INITIAL_PAGES: Record<string, Page> = {
             id: 'chk_summary_text',
             type: 'text',
             settings: {
-              content: '<div class="text-xs space-y-3"><h3 class="text-sm font-semibold text-white mb-2">Order Summary</h3><div class="flex justify-between text-zinc-300"><span>The Hound - Ian Willms</span><span class="font-semibold">$65.00</span></div><div class="border-t border-zinc-800 my-2 pt-2 flex justify-between text-zinc-400"><span>Shipping</span><span>$12.00</span></div><div class="flex justify-between text-zinc-400"><span>Taxes</span><span>$8.45</span></div><div class="border-t border-zinc-800 my-2 pt-2 flex justify-between text-white font-bold text-sm"><span>Total</span><span class="text-red-500">$85.45 CAD</span></div></div>',
+              content: '<div class="text-xs space-y-3"><h3 class="text-sm font-semibold text-white mb-2">Order Summary</h3><div class="flex justify-between text-zinc-300"><span>The Hound - Ian Willms</span><span class="font-semibold">$65.00</span></div><div class="border-t border-zinc-805 my-2 pt-2 flex justify-between text-zinc-550"><span>Shipping</span><span>$12.00</span></div><div class="flex justify-between text-zinc-550"><span>Taxes</span><span>$8.45</span></div><div class="border-t border-zinc-805 my-2 pt-2 flex justify-between text-white font-bold text-sm"><span>Total</span><span class="text-red-500">$85.45 CAD</span></div></div>',
             },
             position: {
               desktop: { x_start: 16, y_start: 4, x_end: 23, y_end: 9, z_index: 2 },
@@ -692,7 +1060,7 @@ export const useLayout = () => {
                 id: `blk_${Date.now()}_empty_text`,
                 type: 'text',
                 settings: {
-                  content: `<h1 class="text-center"><b>${name}</b></h1><p class="text-center text-zinc-500 mt-2">Start designing this page by adding blocks.</p>`,
+                  content: `<h1 class="text-center"><b>${name}</b></h1><p class="text-center text-zinc-550 mt-2">Start designing this page by adding blocks.</p>`,
                   fontSize: 'text-3xl',
                   alignment: 'text-center',
                 },

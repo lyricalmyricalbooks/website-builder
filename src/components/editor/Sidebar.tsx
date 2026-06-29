@@ -51,6 +51,21 @@ const THEME_PRESETS = {
       bodyFont: 'DM Sans',
     }
   },
+  grain_archive: {
+    name: 'Grain Archive (Amber & Emerald)',
+    colors: {
+      primary: '#10b981',
+      secondary: '#3b82f6',
+      background: '#000000',
+      text: '#ffffff',
+      buttonBg: '#10b981',
+      buttonText: '#ffffff',
+    },
+    typography: {
+      headingFont: 'Inter',
+      bodyFont: 'Inter',
+    }
+  },
   sleek_dark: {
     name: 'Sleek Dark & Glassmorphism',
     colors: {
