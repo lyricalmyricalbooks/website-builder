@@ -28,6 +28,9 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
     fontFamily = 'default',
   } = settings;
 
+  // Generate a unique ID to scope link styles
+  const blockId = React.useMemo(() => `txt-${Math.random().toString(36).substr(2, 9)}`, []);
+
   // Resolve font family overrides
   let resolvedFontFamily = undefined;
   if (fontFamily === 'font-serif') {
@@ -49,13 +52,26 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
   };
 
   return (
-    <div
-      className={`w-full h-full p-2 ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${letterSpacing} ${textTransform} ${
-        !isHexColor && color !== 'inherit' ? color : ''
-      }`}
-      style={textStyle}
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
+    <div className="w-full h-full relative" id={blockId}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        #${blockId} a {
+          color: ${theme?.colors?.primary || '#3b82f6'};
+          text-decoration: underline;
+          transition: opacity 0.2s ease;
+          pointer-events: auto;
+        }
+        #${blockId} a:hover {
+          opacity: 0.7;
+        }
+      ` }} />
+      <div
+        className={`w-full h-full p-2 ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${letterSpacing} ${textTransform} ${
+          !isHexColor && color !== 'inherit' ? color : ''
+        }`}
+        style={textStyle}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    </div>
   );
 };
 

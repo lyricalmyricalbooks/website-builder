@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import { 
+  Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
+  Link as LinkIcon, Check 
+} from 'lucide-react';
 import { Block, Section, PageLayout, GridPosition } from '@/types/editor';
 import { TextBlock } from '../blocks/TextBlock';
 import { ImageBlock } from '../blocks/ImageBlock';
@@ -218,6 +222,13 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     }
   };
 
+  const handleInsertLink = () => {
+    const url = prompt('Enter Link URL:', 'https://');
+    if (url) {
+      document.execCommand('createLink', false, url);
+    }
+  };
+
   // Render a single block inside the editor canvas
   const renderBlock = (block: Block, sectionId: string) => {
     const isSelected = selectedBlockId === block.id;
@@ -389,61 +400,69 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
         {/* Floating formatting toolbar for inline text editor */}
         {isEditingText && (
-          <div className="absolute -top-12 left-0 bg-slate-900 border border-slate-750 text-slate-100 p-1.5 rounded-xl shadow-2xl flex items-center space-x-1.5 z-40 select-none pointer-events-auto">
+          <div className="absolute -top-12 left-0 bg-slate-950 border border-slate-800 text-slate-200 p-1.5 rounded-xl shadow-2xl flex items-center space-x-2 z-40 select-none pointer-events-auto">
             <button
               type="button"
-              onClick={() => document.execCommand('bold')}
-              className="p-1 hover:bg-slate-800 rounded font-bold text-xs w-6 h-6 flex items-center justify-center"
+              onMouseDown={(e) => { e.preventDefault(); document.execCommand('bold'); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Bold"
             >
-              B
+              <Bold size={13} />
             </button>
             <button
               type="button"
-              onClick={() => document.execCommand('italic')}
-              className="p-1 hover:bg-slate-800 rounded italic text-xs w-6 h-6 flex items-center justify-center"
+              onMouseDown={(e) => { e.preventDefault(); document.execCommand('italic'); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Italic"
             >
-              I
+              <Italic size={13} />
             </button>
             <button
               type="button"
-              onClick={() => document.execCommand('underline')}
-              className="p-1 hover:bg-slate-800 rounded underline text-xs w-6 h-6 flex items-center justify-center"
+              onMouseDown={(e) => { e.preventDefault(); document.execCommand('underline'); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Underline"
             >
-              U
+              <Underline size={13} />
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); handleInsertLink(); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
+              title="Insert Link"
+            >
+              <LinkIcon size={13} />
             </button>
             <div className="w-px h-4 bg-slate-800" />
             <button
               type="button"
-              onClick={() => updateBlockSettings(block.id, { alignment: 'text-left' })}
-              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              onMouseDown={(e) => { e.preventDefault(); updateBlockSettings(block.id, { alignment: 'text-left' }); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Align Left"
             >
-              Left
+              <AlignLeft size={13} />
             </button>
             <button
               type="button"
-              onClick={() => updateBlockSettings(block.id, { alignment: 'text-center' })}
-              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              onMouseDown={(e) => { e.preventDefault(); updateBlockSettings(block.id, { alignment: 'text-center' }); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Align Center"
             >
-              Center
+              <AlignCenter size={13} />
             </button>
             <button
               type="button"
-              onClick={() => updateBlockSettings(block.id, { alignment: 'text-right' })}
-              className="p-1 hover:bg-slate-800 rounded text-[10px] px-1"
+              onMouseDown={(e) => { e.preventDefault(); updateBlockSettings(block.id, { alignment: 'text-right' }); }}
+              className="p-1.5 hover:bg-slate-850 rounded text-slate-300 hover:text-white"
               title="Align Right"
             >
-              Right
+              <AlignRight size={13} />
             </button>
             <div className="w-px h-4 bg-slate-800" />
             <select
               value={block.settings.fontSize || 'text-base'}
               onChange={(e) => updateBlockSettings(block.id, { fontSize: e.target.value })}
-              className="bg-slate-950 border border-slate-800 text-[10px] rounded px-1.5 py-0.5 text-slate-200 focus:outline-none"
+              className="bg-slate-900 border border-slate-850 text-[10px] rounded px-1.5 py-0.5 text-slate-200 focus:outline-none"
             >
               <option value="text-sm">Small</option>
               <option value="text-base">Body</option>
@@ -455,9 +474,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             <button
               type="button"
               onClick={() => setEditingBlockId(null)}
-              className="px-1.5 py-0.5 bg-blue-600 hover:bg-blue-500 rounded text-[9px] font-bold text-white"
+              className="p-1.5 bg-blue-600 hover:bg-blue-500 rounded text-white flex items-center justify-center"
+              title="Done"
             >
-              Done
+              <Check size={13} />
             </button>
           </div>
         )}
