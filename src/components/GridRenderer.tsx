@@ -55,7 +55,7 @@ const AnimatedBlock: React.FC<AnimatedBlockProps> = ({
   });
 
   const parallaxSpeed = block.animation?.type === 'scroll-parallax' ? (block.animation.speed ?? 0.3) * 100 : 0;
-  const y = useTransform(scrollYProgress, [0, 1], [-parallaxSpeed, parallaxSpeed]);
+  const yParallax = useTransform(scrollYProgress, [0, 1], [-parallaxSpeed, parallaxSpeed]);
 
   // Render the specific block type
   const renderBlockContent = () => {
@@ -126,6 +126,10 @@ const AnimatedBlock: React.FC<AnimatedBlockProps> = ({
     }
   };
 
+  // Fine-grained offsets
+  const offsetX = block.settings.offsetX ? parseInt(block.settings.offsetX) : 0;
+  const offsetY = block.settings.offsetY ? parseInt(block.settings.offsetY) : 0;
+
   const blockStyle: React.CSSProperties = {
     gridColumnStart: pos.x_start,
     gridColumnEnd: pos.x_end,
@@ -159,20 +163,39 @@ const AnimatedBlock: React.FC<AnimatedBlockProps> = ({
     }
   }
 
+  // Hover effects config
+  const hoverSettings = block.settings.hoverEffectSettings || {};
+  let whileHover: any = {};
+  let hoverTransition = { duration: 0.4, ease: [0.16, 1, 0.3, 1] };
+
+  if (hoverSettings.float) {
+    whileHover.y = -8;
+  }
+  if (hoverSettings.glow) {
+    whileHover.boxShadow = `0 20px 40px ${theme.colors.primary}33`;
+  }
+  if (hoverSettings.scale) {
+    whileHover.scale = 1.03;
+  }
+
   return (
     <motion.div
       ref={containerRef}
       style={{
         ...blockStyle,
-        y: block.animation?.type === 'scroll-parallax' ? y : undefined,
+        x: offsetX || undefined,
+        y: block.animation?.type === 'scroll-parallax' ? yParallax : (offsetY || undefined),
       }}
       initial={initial}
       whileInView={animate}
+      whileHover={Object.keys(whileHover).length > 0 ? whileHover : undefined}
       viewport={{ once: true, margin: '-50px' }}
       transition={transition}
       className="group/block"
     >
-      {renderBlockContent()}
+      <div className="w-full h-full" style={{ transition: 'box-shadow 0.4s ease, transform 0.4s ease' }}>
+        {renderBlockContent()}
+      </div>
     </motion.div>
   );
 };
@@ -209,13 +232,50 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
     maxWidth: '1280px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    zIndex: 10,
+  };
+
+  // Render SVG shape dividers
+  const renderShapeDivider = (type: string, position: 'top' | 'bottom', color: string) => {
+    const fill = color || '#ffffff';
+    const baseClass = `absolute left-0 right-0 w-full h-16 pointer-events-none z-20 ${
+      position === 'top' ? 'top-0 -translate-y-[99%]' : 'bottom-0 translate-y-[99%] rotate-180'
+    }`;
+
+    if (type === 'slope') {
+      return (
+        <svg className={baseClass} viewBox="0 0 1440 100" preserveAspectRatio="none" fill={fill}>
+          <path d="M0,100 L1440,0 L1440,100 Z" />
+        </svg>
+      );
+    }
+    if (type === 'curve') {
+      return (
+        <svg className={baseClass} viewBox="0 0 1440 100" preserveAspectRatio="none" fill={fill}>
+          <path d="M0,100 Q720,0 1440,100 Z" />
+        </svg>
+      );
+    }
+    if (type === 'wave') {
+      return (
+        <svg className={baseClass} viewBox="0 0 1440 100" preserveAspectRatio="none" fill={fill}>
+          <path d="M0,100 C480,40 960,160 1440,100 L1440,100 L1440,100 Z" />
+        </svg>
+      );
+    }
+    return null;
   };
 
   return (
     <section
       style={sectionStyle}
-      className={`w-full px-6 md:px-12 ${section.settings.paddingY || 'py-20'} overflow-hidden`}
+      className={`w-full px-6 md:px-12 ${section.settings.paddingY || 'py-20'} overflow-visible relative`}
     >
+      {/* Top Divider */}
+      {section.settings.topDivider && section.settings.topDivider !== 'none' && (
+        renderShapeDivider(section.settings.topDivider, 'top', section.settings.topDividerColor)
+      )}
+
       <div style={gridStyle}>
         {/* Render grid lines in background if in editor mode and not preview */}
         {!isPreview && (
@@ -242,6 +302,11 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
           />
         ))}
       </div>
+
+      {/* Bottom Divider */}
+      {section.settings.bottomDivider && section.settings.bottomDivider !== 'none' && (
+        renderShapeDivider(section.settings.bottomDivider, 'bottom', section.settings.bottomDividerColor)
+      )}
     </section>
   );
 };

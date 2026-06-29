@@ -824,11 +824,85 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
 
+              {/* Fine-Grained Offsets */}
+              <div>
+                <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Fine-Grained Offsets</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Offset X (px)</label>
+                    <input
+                      type="number"
+                      value={selectedBlock.settings.offsetX || 0}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { offsetX: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Offset Y (px)</label>
+                    <input
+                      type="number"
+                      value={selectedBlock.settings.offsetY || 0}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { offsetY: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover Interactions */}
+              <div>
+                <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Hover Micro-Interactions</h5>
+                <div className="space-y-2 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-300">Gently Float Up</span>
+                    <input
+                      type="checkbox"
+                      checked={selectedBlock.settings.hoverEffectSettings?.float || false}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, {
+                        hoverEffectSettings: {
+                          ...selectedBlock!.settings.hoverEffectSettings,
+                          float: e.target.checked
+                        }
+                      })}
+                      className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-700 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-300">Grow / Scale Up</span>
+                    <input
+                      type="checkbox"
+                      checked={selectedBlock.settings.hoverEffectSettings?.scale || false}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, {
+                        hoverEffectSettings: {
+                          ...selectedBlock!.settings.hoverEffectSettings,
+                          scale: e.target.checked
+                        }
+                      })}
+                      className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-700 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-300">Brand Glow Effect</span>
+                    <input
+                      type="checkbox"
+                      checked={selectedBlock.settings.hoverEffectSettings?.glow || false}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, {
+                        hoverEffectSettings: {
+                          ...selectedBlock!.settings.hoverEffectSettings,
+                          glow: e.target.checked
+                        }
+                      })}
+                      className="w-4 h-4 text-blue-600 bg-slate-800 border-slate-700 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Block Specific Settings */}
               {selectedBlock.type === 'text' && (
                 <div className="space-y-3">
                   <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Text Settings</h5>
-                  <p className="text-[10px] text-slate-450 italic bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">
+                  <p className="text-[10px] text-slate-455 italic bg-slate-900/50 p-2 rounded-lg border border-slate-800/60">
                     💡 Double-click the text on the canvas to edit inline.
                   </p>
                   <div>
@@ -899,6 +973,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <option value="capitalize">Capitalize</option>
                     </select>
                   </div>
+
+                  {/* Text Gradient Settings */}
+                  <div className="bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[9px] text-slate-400 font-bold uppercase">Text Fill Type</label>
+                      <div className="flex bg-slate-950 p-0.5 rounded border border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => updateBlockSettings(selectedBlock!.id, { textGradient: false })}
+                          className={`px-2 py-0.5 rounded text-[9px] font-bold ${!selectedBlock.settings.textGradient ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                        >
+                          Solid
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateBlockSettings(selectedBlock!.id, { textGradient: true })}
+                          className={`px-2 py-0.5 rounded text-[9px] font-bold ${selectedBlock.settings.textGradient ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                        >
+                          Gradient
+                        </button>
+                      </div>
+                    </div>
+                    {selectedBlock.settings.textGradient && (
+                      <div className="space-y-2 pt-1 border-t border-slate-800/60">
+                        <div>
+                          <label className="text-[9px] text-slate-500 block">Gradient Colors</label>
+                          <select
+                            value={selectedBlock.settings.textGradientColor || 'linear-gradient(135deg, #3b82f6, #8b5cf6)'}
+                            onChange={(e) => updateBlockSettings(selectedBlock!.id, { textGradientColor: e.target.value })}
+                            className="w-full bg-slate-850 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                          >
+                            <option value="linear-gradient(135deg, #3b82f6, #8b5cf6)">Blue to Purple</option>
+                            <option value="linear-gradient(135deg, #ec4899, #f43f5e)">Pink to Rose</option>
+                            <option value="linear-gradient(135deg, #f59e0b, #e11d48)">Gold to Crimson</option>
+                            <option value="linear-gradient(135deg, #10b981, #059669)">Emerald Green</option>
+                            <option value="linear-gradient(135deg, #ffffff, #a1a1aa)">Silver Metallic</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <label className="text-[9px] text-slate-500 block">Text Color</label>
                     <input
@@ -1221,6 +1337,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <option value="py-20">Medium (py-20)</option>
                     <option value="py-32">Large (py-32)</option>
                   </select>
+                </div>
+
+                {/* SVG Shape Dividers */}
+                <div className="border-t border-slate-800 pt-4 space-y-3">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Shape Dividers</h5>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Bottom Divider</label>
+                    <select
+                      value={selectedSection.settings.bottomDivider || 'none'}
+                      onChange={(e) => updateSectionSettings(selectedSection.id, { bottomDivider: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="none">None (Straight)</option>
+                      <option value="slope">Slope Angle</option>
+                      <option value="curve">Gentle Curve</option>
+                      <option value="wave">Organic Wave</option>
+                    </select>
+                  </div>
+                  {selectedSection.settings.bottomDivider && selectedSection.settings.bottomDivider !== 'none' && (
+                    <div>
+                      <label className="text-[9px] text-slate-500 block">Divider Fill Color</label>
+                      <input
+                        type="color"
+                        value={selectedSection.settings.bottomDividerColor || '#ffffff'}
+                        onChange={(e) => updateSectionSettings(selectedSection.id, { bottomDividerColor: e.target.value })}
+                        className="w-full bg-slate-800 border border-slate-700 text-xs rounded focus:outline-none h-8"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )

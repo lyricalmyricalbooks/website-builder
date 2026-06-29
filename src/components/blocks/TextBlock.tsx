@@ -11,6 +11,8 @@ interface TextBlockProps {
     letterSpacing?: string;
     textTransform?: string;
     fontFamily?: string;
+    textGradient?: boolean;
+    textGradientColor?: string;
   };
   theme?: any;
 }
@@ -26,6 +28,8 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
     letterSpacing = 'tracking-normal',
     textTransform = 'normal-case',
     fontFamily = 'default',
+    textGradient = false,
+    textGradientColor = 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
   } = settings;
 
   // Generate a unique ID to scope link styles
@@ -46,8 +50,13 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
   }
 
   const isHexColor = color.startsWith('#') || color.startsWith('rgb') || color.startsWith('var');
+  const isGradientActive = textGradient && textGradientColor;
+
   const textStyle: React.CSSProperties = {
-    color: isHexColor ? color : undefined,
+    color: isGradientActive ? 'transparent' : (isHexColor ? color : undefined),
+    backgroundImage: isGradientActive ? textGradientColor : undefined,
+    WebkitBackgroundClip: isGradientActive ? 'text' : undefined,
+    backgroundClip: isGradientActive ? 'text' : undefined,
     fontFamily: resolvedFontFamily,
   };
 
@@ -66,7 +75,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
       ` }} />
       <div
         className={`w-full h-full p-2 ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${letterSpacing} ${textTransform} ${
-          !isHexColor && color !== 'inherit' ? color : ''
+          !isHexColor && color !== 'inherit' && !isGradientActive ? color : ''
         }`}
         style={textStyle}
         dangerouslySetInnerHTML={{ __html: content }}
