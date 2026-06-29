@@ -83,6 +83,86 @@ const THEME_PRESETS = {
   }
 };
 
+const CURATED_PALETTES = [
+  {
+    name: 'Editorial Minimalist',
+    colors: {
+      background: '#000000',
+      text: '#F9F9F9',
+      primary: '#F61515',
+      secondary: '#111111',
+      buttonBg: '#FBFBFB',
+      buttonText: '#020202',
+    }
+  },
+  {
+    name: 'Light Editorial',
+    colors: {
+      background: '#FFFFFF',
+      text: '#111111',
+      primary: '#111111',
+      secondary: '#F4F4F5',
+      buttonBg: '#111111',
+      buttonText: '#FFFFFF',
+    }
+  },
+  {
+    name: 'Nordic Frost',
+    colors: {
+      background: '#F0F4F8',
+      text: '#102A43',
+      primary: '#486581',
+      secondary: '#D9E2EC',
+      buttonBg: '#102A43',
+      buttonText: '#F0F4F8',
+    }
+  },
+  {
+    name: 'Sunset Clay',
+    colors: {
+      background: '#FFF8F6',
+      text: '#4A2820',
+      primary: '#DD6B4F',
+      secondary: '#F9D9D2',
+      buttonBg: '#4A2820',
+      buttonText: '#FFF8F6',
+    }
+  },
+  {
+    name: 'Earthy Sage',
+    colors: {
+      background: '#F4F7F4',
+      text: '#1A2E1A',
+      primary: '#7A9A7A',
+      secondary: '#E2EAE2',
+      buttonBg: '#1A2E1A',
+      buttonText: '#F4F7F4',
+    }
+  },
+  {
+    name: 'Cyberpunk Neon',
+    colors: {
+      background: '#0B0F19',
+      text: '#E2E8F0',
+      primary: '#EC4899',
+      secondary: '#06B6D4',
+      buttonBg: '#EC4899',
+      buttonText: '#0B0F19',
+    }
+  },
+  {
+    name: 'Luxury Gold',
+    colors: {
+      background: '#0C0C0C',
+      text: '#E5E5E5',
+      primary: '#D4AF37',
+      secondary: '#1C1C1C',
+      buttonBg: '#D4AF37',
+      buttonText: '#0C0C0C',
+    }
+  }
+];
+
 export const Sidebar: React.FC<SidebarProps> = ({
   layout,
   breakpoint,
@@ -412,6 +492,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <option key={key} value={key}>{p.name}</option>
                 ))}
               </select>
+            </div>
+
+            {/* Curated Color Palettes Swatch Library */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center">
+                <Palette size={13} className="mr-1.5 text-blue-500" />
+                Curated Color Palettes
+              </h3>
+              <p className="text-[10px] text-slate-400 mb-3">Quick-apply professionally curated swatches:</p>
+              <div className="space-y-2">
+                {CURATED_PALETTES.map((palette, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => updateTheme({ colors: palette.colors })}
+                    className="w-full p-2 bg-slate-850 hover:bg-slate-800 border border-slate-800 rounded-xl flex items-center justify-between transition-all hover:border-slate-700"
+                  >
+                    <span className="text-[10px] font-medium text-slate-300">{palette.name}</span>
+                    <div className="flex space-x-1">
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-700" style={{ backgroundColor: palette.colors.background }} />
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-700" style={{ backgroundColor: palette.colors.text }} />
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-700" style={{ backgroundColor: palette.colors.primary }} />
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-700" style={{ backgroundColor: palette.colors.secondary }} />
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
