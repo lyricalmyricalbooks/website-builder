@@ -5,62 +5,68 @@ import { PageLayout, Section, Block, GridPosition, ThemeSettings, NavigationLink
 
 const INITIAL_THEME: ThemeSettings = {
   colors: {
-    primary: '#3b82f6',
-    secondary: '#1f2937',
-    background: '#ffffff',
-    text: '#111827',
-    buttonBg: '#3b82f6',
-    buttonText: '#ffffff',
+    primary: '#F61515', // Lyricalmyrical Red hover
+    secondary: '#111111',
+    background: '#000000', // Pitch Black background
+    text: '#F9F9F9',       // Off-white text
+    buttonBg: '#FBFBFB',   // White buttons
+    buttonText: '#020202', // Black button text
   },
   typography: {
-    headingFont: 'Inter',
-    bodyFont: 'Inter',
+    headingFont: 'DM Sans',
+    bodyFont: 'DM Sans',
   },
   spacingScale: [4, 8, 12, 16, 24, 32, 48, 64],
   checkout: {
-    accentColor: '#3b82f6',
-    backgroundColor: '#ffffff',
+    accentColor: '#F61515',
+    backgroundColor: '#000000',
     inputBorderRadius: 'rounded-md',
-    fontFamily: 'Inter',
+    fontFamily: 'DM Sans',
   },
 };
 
 const INITIAL_NAV: NavigationLink[] = [
-  { id: 'nav_home', label: 'Home', url: '/' },
   { 
-    id: 'nav_shop', 
-    label: 'Shop', 
-    url: '/collections/all',
+    id: 'nav_products', 
+    label: 'Products', 
+    url: '/products',
     children: [
-      { id: 'nav_new', label: 'New Arrivals', url: '/collections/new' },
-      { id: 'nav_sale', label: 'On Sale', url: '/collections/sale' },
+      { id: 'nav_all', label: 'All Products', url: '/products' },
+      { id: 'nav_books', label: 'Books', url: '/category/books' },
+      { id: 'nav_zines', label: 'Zines', url: '/category/zines' },
     ]
   },
   { id: 'nav_about', label: 'About', url: '/about' },
+  { id: 'nav_submissions', label: 'Submissions', url: '/submissions' },
+  { id: 'nav_opencall', label: 'Open Call', url: '/open-call-collective-book' },
+  { id: 'nav_roots', label: 'History', url: '/roots' },
+  { id: 'nav_contact', label: 'Contact', url: '/contact' },
 ];
 
 const INITIAL_LAYOUT: PageLayout = {
-  id: 'home_page',
-  title: 'Home Page',
+  id: 'lyricalmyrical_theme',
+  title: 'Lyricalmyrical Books',
   theme: INITIAL_THEME,
   navigation: INITIAL_NAV,
   customComponents: {
-    'CustomFeatureCard': `// State-of-the-art custom card component
-export default function CustomFeatureCard({ settings, theme }) {
-  const title = settings.title || "Interactive Card";
-  const desc = settings.description || "Hover over me to see magnetic physics and transitions.";
+    'BookHighlightCard': `// Premium custom block for featured art books
+export default function BookHighlightCard({ settings }) {
+  const title = settings.title || "Featured Book";
+  const artist = settings.artist || "Artist Name";
+  const desc = settings.description || "Limited edition art publication.";
   
   return (
-    <div className="p-6 h-full bg-slate-900 border border-slate-800 text-slate-100 rounded-2xl flex flex-col justify-between hover:border-blue-500 transition-colors duration-300">
+    <div className="p-6 h-full bg-zinc-950 border border-zinc-900 text-zinc-100 rounded-2xl flex flex-col justify-between hover:border-red-600 transition-colors duration-300">
       <div>
-        <div className="w-10 h-10 mb-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
-          ⚡
+        <div className="w-10 h-10 mb-4 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 font-bold">
+          📚
         </div>
-        <h4 className="text-lg font-semibold mb-2">{title}</h4>
-        <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
+        <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{artist}</span>
+        <h4 className="text-lg font-semibold mt-1 mb-2">{title}</h4>
+        <p className="text-xs text-zinc-450 leading-relaxed">{desc}</p>
       </div>
-      <div className="mt-4 text-xs text-blue-500 font-medium tracking-wide uppercase">
-        Active Developer Component
+      <div className="mt-4 text-[10px] text-zinc-500 font-medium tracking-wide uppercase">
+        Lyricalmyrical Press
       </div>
     </div>
   );
@@ -68,33 +74,59 @@ export default function CustomFeatureCard({ settings, theme }) {
   },
   sections: [
     {
+      id: 'sec_announcement',
+      type: 'announcement',
+      isGlobal: true,
+      settings: {
+        backgroundColor: '#000000',
+        paddingY: 'py-2',
+        textColor: '#F9F9F9',
+      },
+      blocks: [
+        {
+          id: 'blk_announce_text',
+          type: 'text',
+          settings: {
+            content: '<p class="text-center text-xs tracking-wider uppercase">THE HOUND BY IAN WILLMS IS HERE &nbsp;|&nbsp; Shipping Internationally</p>',
+            fontSize: 'text-xs',
+            color: '#F9F9F9',
+            alignment: 'text-center',
+          },
+          position: {
+            desktop: { x_start: 1, y_start: 1, x_end: 25, y_end: 2, z_index: 1 },
+            mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 2, z_index: 1 },
+          },
+        }
+      ]
+    },
+    {
       id: 'sec_header',
       type: 'header',
       isGlobal: true,
       settings: {
-        backgroundColor: '#ffffff',
-        paddingY: 'py-4',
-        textColor: '#111827',
+        backgroundColor: '#000000',
+        paddingY: 'py-6',
+        textColor: '#F9F9F9',
       },
       blocks: [
         {
           id: 'blk_logo',
           type: 'text',
           settings: {
-            content: '<span class="font-bold text-xl tracking-tight">BRAND<b>STORE</b></span>',
+            content: '<span class="font-bold text-lg uppercase tracking-widest text-white">Lyricalmyrical<b>Books</b></span>',
             fontSize: 'text-lg',
-            color: '#111827',
+            color: '#F9F9F9',
           },
           position: {
-            desktop: { x_start: 2, y_start: 1, x_end: 6, y_end: 2, z_index: 1 },
-            mobile: { x_start: 1, y_start: 1, x_end: 4, y_end: 2, z_index: 1 },
+            desktop: { x_start: 2, y_start: 1, x_end: 8, y_end: 2, z_index: 1 },
+            mobile: { x_start: 1, y_start: 1, x_end: 6, y_end: 2, z_index: 1 },
           },
         },
         {
           id: 'blk_search',
           type: 'search',
           settings: {
-            placeholder: 'Search products...',
+            placeholder: 'Search art books & zines...',
           },
           position: {
             desktop: { x_start: 18, y_start: 1, x_end: 24, y_end: 2, z_index: 1 },
@@ -107,24 +139,24 @@ export default function CustomFeatureCard({ settings, theme }) {
       id: 'sec_hero',
       type: 'hero',
       settings: {
-        backgroundColor: '#ffffff',
-        paddingY: 'py-24',
-        textColor: '#111827',
+        backgroundColor: '#000000',
+        paddingY: 'py-20',
+        textColor: '#F9F9F9',
       },
       blocks: [
         {
           id: 'blk_hero_title',
           type: 'text',
           settings: {
-            content: '<h1><b>Design the Future of E-Commerce</b></h1>',
-            fontSize: 'text-5xl md:text-6xl',
-            fontWeight: 'font-bold',
-            color: '#111827',
-            alignment: 'text-center',
+            content: '<h1>Independent publishing house specializing in photography & art books.</h1>',
+            fontSize: 'text-3xl md:text-4xl',
+            fontWeight: 'font-medium',
+            color: '#F9F9F9',
+            alignment: 'text-left',
           },
           position: {
-            desktop: { x_start: 3, y_start: 1, x_end: 23, y_end: 4, z_index: 1 },
-            mobile: { x_start: 1, y_start: 3, x_end: 9, y_end: 6, z_index: 1 },
+            desktop: { x_start: 2, y_start: 1, x_end: 15, y_end: 4, z_index: 1 },
+            mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 4, z_index: 1 },
           },
           animation: { type: 'slide-up', delay: 100, duration: 800 },
         },
@@ -132,30 +164,112 @@ export default function CustomFeatureCard({ settings, theme }) {
           id: 'blk_hero_subtitle',
           type: 'text',
           settings: {
-            content: '<p>Build high-performance, custom storefronts using our 24-column CSS Grid layout engine. Experience absolute design freedom with zero-bloat rendering.</p>',
-            fontSize: 'text-lg',
-            color: '#4b5563',
-            alignment: 'text-center',
+            content: '<p>Based in Toronto with roots in Italy. Supporting artists and capturing presence through high-quality print publications.</p>',
+            fontSize: 'text-base',
+            color: '#A1A1AA',
+            alignment: 'text-left',
           },
           position: {
-            desktop: { x_start: 5, y_start: 4, x_end: 21, y_end: 6, z_index: 1 },
-            mobile: { x_start: 1, y_start: 6, x_end: 9, y_end: 9, z_index: 1 },
+            desktop: { x_start: 2, y_start: 4, x_end: 13, y_end: 6, z_index: 1 },
+            mobile: { x_start: 1, y_start: 4, x_end: 9, y_end: 6, z_index: 1 },
           },
-          animation: { type: 'slide-up', delay: 300, duration: 800 },
+          animation: { type: 'slide-up', delay: 200, duration: 800 },
         },
         {
           id: 'blk_hero_button',
           type: 'button',
           settings: {
-            text: 'Explore Editor',
+            text: 'Browse Publications',
             variant: 'primary',
             magnetic: true,
           },
           position: {
-            desktop: { x_start: 10, y_start: 6, x_end: 16, y_end: 8, z_index: 1 },
-            mobile: { x_start: 2, y_start: 9, x_end: 8, y_end: 11, z_index: 1 },
+            desktop: { x_start: 2, y_start: 6, x_end: 7, y_end: 8, z_index: 1 },
+            mobile: { x_start: 1, y_start: 6, x_end: 9, y_end: 8, z_index: 1 },
           },
-          animation: { type: 'zoom', delay: 500, duration: 600 },
+          animation: { type: 'zoom', delay: 300, duration: 600 },
+        },
+        {
+          id: 'blk_hero_image',
+          type: 'image',
+          settings: {
+            src: 'https://assets.bigcartel.com/product_images/424080591/preview_DL01130214-2.jpg?auto=format&fit=max&w=1200',
+            alt: 'The Hound by Ian Willms',
+            objectFit: 'cover',
+            borderRadius: 'rounded-xl',
+            shadow: 'shadow-lg',
+          },
+          position: {
+            desktop: { x_start: 15, y_start: 1, x_end: 24, y_end: 9, z_index: 1 },
+            mobile: { x_start: 1, y_start: 9, x_end: 9, y_end: 13, z_index: 1 },
+          },
+          animation: { type: 'fade-in', delay: 400, duration: 1000 },
+        }
+      ],
+    },
+    {
+      id: 'sec_products',
+      type: 'products',
+      settings: {
+        backgroundColor: '#000000',
+        paddingY: 'py-16',
+        textColor: '#F9F9F9',
+      },
+      blocks: [
+        {
+          id: 'p_title',
+          type: 'text',
+          settings: {
+            content: '<h3><b>Featured Publications</b></h3>',
+            fontSize: 'text-2xl',
+            fontWeight: 'font-semibold',
+            alignment: 'text-left',
+          },
+          position: {
+            desktop: { x_start: 2, y_start: 1, x_end: 24, y_end: 2, z_index: 1 },
+            mobile: { x_start: 1, y_start: 1, x_end: 9, y_end: 2, z_index: 1 },
+          },
+        },
+        {
+          id: 'prod_1',
+          type: 'product-card',
+          settings: {
+            title: 'The Hound - Ian Willms',
+            price: '$65.00',
+            imageSrc: 'https://assets.bigcartel.com/product_images/424080591/preview_DL01130214-2.jpg?auto=format&fit=max&w=500',
+            badge: 'New',
+          },
+          position: {
+            desktop: { x_start: 2, y_start: 2, x_end: 9, y_end: 7, z_index: 1 },
+            mobile: { x_start: 1, y_start: 2, x_end: 9, y_end: 7, z_index: 1 },
+          },
+        },
+        {
+          id: 'prod_2',
+          type: 'product-card',
+          settings: {
+            title: 'Un Fantastico Altrove - Silvia Clo Di Gregorio',
+            price: '$50.00',
+            imageSrc: 'https://assets.bigcartel.com/product_images/406503165/_DSC3186.jpg?auto=format&fit=max&w=500',
+            badge: 'On Sale',
+          },
+          position: {
+            desktop: { x_start: 9, y_start: 2, x_end: 16, y_end: 7, z_index: 1 },
+            mobile: { x_start: 1, y_start: 7, x_end: 9, y_end: 12, z_index: 1 },
+          },
+        },
+        {
+          id: 'prod_3',
+          type: 'product-card',
+          settings: {
+            title: 'Archaeology of Presence - Ilaria De Benedetto',
+            price: '$43.00',
+            imageSrc: 'https://assets.bigcartel.com/product_images/424154676/aiversion.jpg?auto=format&fit=max&w=500',
+          },
+          position: {
+            desktop: { x_start: 16, y_start: 2, x_end: 23, y_end: 7, z_index: 1 },
+            mobile: { x_start: 1, y_start: 12, x_end: 9, y_end: 17, z_index: 1 },
+          },
         },
       ],
     },
@@ -212,11 +326,11 @@ export const useLayout = () => {
       const newSection: Section = {
         id: `sec_${Date.now()}`,
         type,
-        isGlobal: type === 'header' || type === 'footer',
+        isGlobal: type === 'header' || type === 'footer' || type === 'announcement',
         settings: {
-          backgroundColor: '#ffffff',
+          backgroundColor: '#000000',
           paddingY: 'py-20',
-          textColor: '#111827',
+          textColor: '#F9F9F9',
         },
         blocks: [],
       };
@@ -443,6 +557,7 @@ export const useLayout = () => {
     setPan,
     undo,
     redo,
+    updateLayout,
     addSection,
     deleteSection,
     updateSectionSettings,

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #1e1e1e;
+      color: #e3e3e3;
+      font-size: 12px;
+    }
+    h2 {
+      font-size: 14px;
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    p {
+      margin: 0 0 16px 0;
+      color: #a3a3a3;
+      font-size: 11px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: #c3c3c3;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px border-slate-700;
+      background-color: #2a2a2a;
+      color: #ffffff;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    input:focus {
+      outline: none;
+      border-color: #18a0fb;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background-color 0.15s;
+    }
+    .btn-primary {
+      background-color: #18a0fb;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: #0d8de3;
+    }
+    .btn-secondary {
+      background-color: #333333;
+      color: #e3e3e3;
+      border: 1px solid #444444;
+    }
+    .btn-secondary:hover {
+      background-color: #444444;
+    }
+    .status {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      display: none;
+    }
+    .status-success {
+      background-color: rgba(76, 175, 80, 0.15);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      color: #81c784;
+    }
+    .status-error {
+      background-color: rgba(244, 67, 54, 0.15);
+      border: 1px solid rgba(244, 67, 54, 0.3);
+      color: #e57373;
+    }
+  </style>
+</head>
+<body>
+  <h2>Export to Antigravity</h2>
+  <p>Push your Figma frames directly into your live storefront layout.</p>
+
+  <div class="form-group">
+    <label for="url">Website URL</label>
+    <input type="url" id="url" value="http://localhost:3000">
+  </div>
+
+  <button id="export-btn" class="btn-primary">Export to Storefront</button>
+  <button id="copy-btn" class="btn-secondary">Copy Layout JSON</button>
+
+  <div id="status-box" class="status"></div>
+
+  <script>
+    const exportBtn = document.getElementById('export-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const statusBox = document.getElementById('status-box');
+    const urlInput = document.getElementById('url');
+
+    function showStatus(msg, isError = false) {
+      statusBox.innerText = msg;
+      statusBox.style.display = 'block';
+      statusBox.className = 'status ' + (isError ? 'status-error' : 'status-success');
+    }
+
+    // Trigger analysis in code.js
+    exportBtn.onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'export-layout' } }, '*');
+      showStatus('Analyzing frame...');
+    };
+
+    copyBtn.onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'export-layout' } }, '*');
+      showStatus('Analyzing frame for copy...');
+      // We will handle copy inside the message listener
+    };
+
+    // Listen to compiled layout from code.js
+    window.onmessage = async (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg && msg.type === 'compiled-layout') {
+        const layout = msg.layout;
+        const url = urlInput.value.trim();
+
+        // Check if we are in copy mode or export mode
+        const isCopyMode = document.activeElement === copyBtn;
+
+        if (isCopyMode) {
+          // Copy to clipboard
+          const textarea = document.createElement('textarea');
+          textarea.value = JSON.stringify(layout, null, 2);
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showStatus('📋 Layout JSON copied to clipboard!');
+          return;
+        }
+
+        // Export via webhook
+        try {
+          showStatus('Exporting layout to storefront...');
+          const response = await fetch(url + '/api/import-layout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(layout)
+          });
+          const data = await response.json();
+          if (data.success) {
+            showStatus('🚀 Success! Canvas updated instantly.');
+          } else {
+            showStatus('❌ Export failed: ' + (data.error || 'Unknown error'), true);
+          }
+        } catch (err) {
+          showStatus('❌ Connection failed. Verify Website URL is running.', true);
+        }
+      }
+    };
+  </script>
+</body>
+</html>

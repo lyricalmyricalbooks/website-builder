@@ -22,6 +22,7 @@ export default function EditorPage() {
     setPan,
     undo,
     redo,
+    updateLayout,
     addSection,
     deleteSection,
     updateSectionSettings,
@@ -43,6 +44,34 @@ export default function EditorPage() {
   } = useLayout();
 
   const [isPreview, setIsPreview] = useState(false);
+
+  const handleImportLayout = (newLayout: any) => {
+    updateLayout((next) => {
+      next.id = newLayout.id;
+      next.title = newLayout.title;
+      next.theme = newLayout.theme;
+      next.navigation = newLayout.navigation || [];
+      next.sections = newLayout.sections;
+      next.customComponents = newLayout.customComponents || {};
+    });
+  };
+
+  // Poll the backend API for Figma exports
+  React.useEffect(() => {
+    if (isPreview) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/import-layout');
+        const data = await res.json();
+        if (data.layout) {
+          handleImportLayout(data.layout);
+        }
+      } catch (e) {
+        // Silently fail to avoid console clutter
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isPreview]);
 
   // Compile the custom components into JavaScript strings once so they can be executed by GridRenderer
   // Under a real system, they are saved as compiled strings in the layout JSON.
@@ -101,6 +130,7 @@ export default function EditorPage() {
         canUndo={canUndo}
         canRedo={canRedo}
         layout={layout}
+        onImportLayout={handleImportLayout}
         isPreview={isPreview}
         setIsPreview={setIsPreview}
       />

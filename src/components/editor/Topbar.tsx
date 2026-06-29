@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Monitor, Smartphone, Undo2, Redo2, ZoomIn, ZoomOut, Download, Eye, Edit3 } from 'lucide-react';
+import { Monitor, Smartphone, Undo2, Redo2, ZoomIn, ZoomOut, Download, Upload, Eye, Edit3 } from 'lucide-react';
 import { PageLayout } from '@/types/editor';
 
 interface TopbarProps {
@@ -15,6 +15,7 @@ interface TopbarProps {
   canUndo: boolean;
   canRedo: boolean;
   layout: PageLayout;
+  onImportLayout: (layout: PageLayout) => void;
   isPreview: boolean;
   setIsPreview: (val: boolean) => void;
 }
@@ -30,10 +31,14 @@ export const Topbar: React.FC<TopbarProps> = ({
   canUndo,
   canRedo,
   layout,
+  onImportLayout,
   isPreview,
   setIsPreview,
 }) => {
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importJsonText, setImportJsonText] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
 
   const handleExportJSON = () => {
     setShowExportModal(true);
@@ -47,6 +52,22 @@ export const Topbar: React.FC<TopbarProps> = ({
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+  };
+
+  const handleImportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const parsed = JSON.parse(importJsonText);
+      if (!parsed.id || !parsed.sections) {
+        throw new Error('Invalid layout schema. Must contain id and sections.');
+      }
+      onImportLayout(parsed);
+      setShowImportModal(false);
+      setImportJsonText('');
+      setImportError(null);
+    } catch (err: any) {
+      setImportError(err.message || 'Invalid JSON syntax');
+    }
   };
 
   return (
@@ -146,6 +167,15 @@ export const Topbar: React.FC<TopbarProps> = ({
             <span>{isPreview ? 'Back to Edit' : 'Preview'}</span>
           </button>
 
+          {/* Import Figma */}
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-750 flex items-center space-x-1.5 text-xs font-medium shadow-sm transition-all"
+          >
+            <Upload size={14} />
+            <span>Import Figma</span>
+          </button>
+
           {/* Export JSON */}
           <button
             onClick={handleExportJSON}
@@ -194,6 +224,63 @@ export const Topbar: React.FC<TopbarProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Import Figma Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+          <form onSubmit={handleImportSubmit} className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+              <div>
+                <h3 className="font-bold text-base text-white">Import Figma Design</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Paste the JSON exported from the Antigravity Figma Plugin.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportError(null);
+                }}
+                className="text-slate-400 hover:text-white text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <textarea
+                required
+                value={importJsonText}
+                onChange={(e) => setImportJsonText(e.target.value)}
+                placeholder='Paste Figma JSON here (e.g. {"id": "my_page", "sections": [...]})'
+                className="w-full h-48 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+              {importError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-mono rounded-lg">
+                  Error: {importError}
+                </div>
+              )}
+            </div>
+            <div className="p-5 border-t border-slate-800 flex justify-end space-x-3 bg-slate-950">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportError(null);
+                }}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-sm transition-all flex items-center space-x-1.5"
+              >
+                <Upload size={14} />
+                <span>Import Layout</span>
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </header>
