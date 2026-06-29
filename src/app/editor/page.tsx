@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Edit3 } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { Topbar } from '@/components/editor/Topbar';
 import { Sidebar } from '@/components/editor/Sidebar';
@@ -23,6 +24,9 @@ export default function EditorPage() {
     undo,
     redo,
     updateLayout,
+    setActivePage,
+    addPage,
+    deletePage,
     addSection,
     deleteSection,
     updateSectionSettings,
@@ -45,17 +49,6 @@ export default function EditorPage() {
 
   const [isPreview, setIsPreview] = useState(false);
 
-  const handleImportLayout = (newLayout: any) => {
-    updateLayout((next) => {
-      next.id = newLayout.id;
-      next.title = newLayout.title;
-      next.theme = newLayout.theme;
-      next.navigation = newLayout.navigation || [];
-      next.sections = newLayout.sections;
-      next.customComponents = newLayout.customComponents || {};
-    });
-  };
-
   // Poll the backend API for Figma exports
   React.useEffect(() => {
     if (isPreview) return;
@@ -64,49 +57,38 @@ export default function EditorPage() {
         const res = await fetch('/api/import-layout');
         const data = await res.json();
         if (data.layout) {
-          handleImportLayout(data.layout);
+          updateLayout((next) => {
+            Object.assign(next, data.layout);
+          });
         }
       } catch (e) {
         // Silently fail to avoid console clutter
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [isPreview]);
+  }, [isPreview, updateLayout]);
 
-  // Compile the custom components into JavaScript strings once so they can be executed by GridRenderer
-  // Under a real system, they are saved as compiled strings in the layout JSON.
-  // We transpile them on the fly here.
-  const compiledComponents: Record<string, string> = {};
-  Object.entries(layout.customComponents).forEach(([name, code]) => {
-    try {
-      const { transform } = require('sucrase');
-      compiledComponents[name] = transform(code, {
-        transforms: ['jsx', 'typescript', 'imports'],
-      }).code;
-    } catch (e) {
-      console.error(`Error compiling custom component ${name}:`, e);
-    }
-  });
-
+  // If preview mode, render the static preview version of the page
   if (isPreview) {
     return (
-      <div className="w-full min-h-screen bg-white relative">
+      <div className="relative w-screen h-screen bg-black overflow-x-hidden">
         {/* Floating Back to Edit button */}
         <button
           onClick={() => setIsPreview(false)}
-          className="fixed bottom-6 right-6 z-50 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-850 text-white text-sm font-semibold shadow-lg transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-2xl flex items-center space-x-2 text-sm font-semibold transition-all hover:scale-105"
         >
-          ← Exit Preview
+          <Edit3 size={15} />
+          <span>Back to Editor</span>
         </button>
 
-        {/* Storefront rendering */}
+        {/* Render all active page sections */}
         <div className="w-full">
-          {layout.sections.map((section) => (
+          {(layout.pages[layout.activePageId]?.sections || []).map((section) => (
             <GridRenderer
               key={section.id}
               section={section}
               theme={layout.theme}
-              customComponents={compiledComponents}
+              customComponents={layout.customComponents}
               breakpoint={breakpoint}
               isPreview={true}
             />
@@ -117,8 +99,8 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100">
-      {/* Top Bar */}
+    <div className="h-screen flex flex-col bg-slate-950 overflow-hidden">
+      {/* Top Controls Bar */}
       <Topbar
         title={layout.title}
         breakpoint={breakpoint}
@@ -130,9 +112,12 @@ export default function EditorPage() {
         canUndo={canUndo}
         canRedo={canRedo}
         layout={layout}
-        onImportLayout={handleImportLayout}
+        onImportLayout={(newLayout) => updateLayout((next) => { Object.assign(next, newLayout); })}
         isPreview={isPreview}
         setIsPreview={setIsPreview}
+        setActivePage={setActivePage}
+        addPage={addPage}
+        deletePage={deletePage}
       />
 
       {/* Main Workspace */}

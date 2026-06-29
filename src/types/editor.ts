@@ -77,13 +77,23 @@ export interface ThemeSettings {
   checkout: CheckoutTheme;
 }
 
+export interface Page {
+  id: string;
+  name: string;
+  slug: string;
+  type: 'custom' | 'system';
+  sections: Section[];
+}
+
 export interface PageLayout {
   id: string;
   title: string;
   theme: ThemeSettings;
   navigation: NavigationLink[]; // Global menu structure
   customComponents: Record<string, string>; // Maps componentName -> raw TSX code
-  sections: Section[];
+  pages: Record<string, Page>; // Dictionary of pages by pageId
+  activePageId: string; // The page currently being edited
+  sections?: Section[]; // For backward compatibility
 }
 
 export interface EditorState {

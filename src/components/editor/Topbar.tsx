@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Monitor, Smartphone, Undo2, Redo2, ZoomIn, ZoomOut, Download, Upload, Eye, Edit3 } from 'lucide-react';
+import { 
+  Monitor, Smartphone, Undo2, Redo2, ZoomIn, ZoomOut, 
+  Download, Upload, Eye, Edit3, Trash2, Plus 
+} from 'lucide-react';
 import { PageLayout } from '@/types/editor';
 
 interface TopbarProps {
@@ -18,6 +21,9 @@ interface TopbarProps {
   onImportLayout: (layout: PageLayout) => void;
   isPreview: boolean;
   setIsPreview: (val: boolean) => void;
+  setActivePage: (pageId: string) => void;
+  addPage: (name: string, slug: string) => void;
+  deletePage: (pageId: string) => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -34,11 +40,20 @@ export const Topbar: React.FC<TopbarProps> = ({
   onImportLayout,
   isPreview,
   setIsPreview,
+  setActivePage,
+  addPage,
+  deletePage,
 }) => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showPageDropdown, setShowPageDropdown] = useState(false);
+  const [showAddPageModal, setShowAddPageModal] = useState(false);
+
+  // Form states
   const [importJsonText, setImportJsonText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
+  const [newPageName, setNewPageName] = useState('');
+  const [newPageSlug, setNewPageSlug] = useState('');
 
   const handleExportJSON = () => {
     setShowExportModal(true);
@@ -58,8 +73,8 @@ export const Topbar: React.FC<TopbarProps> = ({
     e.preventDefault();
     try {
       const parsed = JSON.parse(importJsonText);
-      if (!parsed.id || !parsed.sections) {
-        throw new Error('Invalid layout schema. Must contain id and sections.');
+      if (!parsed.id || !parsed.pages) {
+        throw new Error('Invalid layout schema. Must contain id and pages.');
       }
       onImportLayout(parsed);
       setShowImportModal(false);
@@ -70,16 +85,114 @@ export const Topbar: React.FC<TopbarProps> = ({
     }
   };
 
+  const handleCreatePage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPageName.trim() || !newPageSlug.trim()) return;
+    addPage(newPageName, newPageSlug);
+    setNewPageName('');
+    setNewPageSlug('');
+    setShowAddPageModal(false);
+  };
+
   return (
     <header className="h-14 border-b border-slate-800 bg-slate-900 px-6 flex items-center justify-between text-slate-100 z-50 select-none">
-      {/* Brand */}
-      <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
-          Ω
+      {/* Brand & Page Selector */}
+      <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
+            Ω
+          </div>
+          <div>
+            <h1 className="text-sm font-bold tracking-wide uppercase">Antigravity</h1>
+            <p className="text-[10px] text-slate-400">Storefront Builder</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-sm font-bold tracking-wide uppercase">Antigravity</h1>
-          <p className="text-[10px] text-slate-400">E-Commerce Storefront Builder</p>
+
+        {/* Vertical Divider */}
+        <div className="w-px h-6 bg-slate-850" />
+
+        {/* Page Selector Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowPageDropdown(!showPageDropdown)}
+            className="px-3 py-1.5 bg-slate-850 hover:bg-slate-800 border border-slate-750 text-slate-200 hover:text-white rounded-lg flex items-center space-x-2 text-xs font-semibold shadow-sm transition-all"
+          >
+            <span>Page: <b className="text-blue-400">{layout.pages[layout.activePageId]?.name || 'Home'}</b></span>
+            <span className="text-[10px] text-slate-500 font-mono">({layout.pages[layout.activePageId]?.slug})</span>
+            <span className="text-[9px] text-slate-500">▼</span>
+          </button>
+
+          {showPageDropdown && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowPageDropdown(false)} />
+              <div className="absolute left-0 mt-1.5 w-64 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl z-50 p-2 space-y-1">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 px-2 block mb-1">Custom Pages</span>
+                {Object.values(layout.pages).filter(p => p.type === 'custom').map((p) => (
+                  <div
+                    key={p.id}
+                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
+                      layout.activePageId === p.id ? 'bg-blue-600/15 text-blue-450 border border-blue-500/10' : 'text-slate-350 hover:bg-slate-905 hover:text-slate-200'
+                    }`}
+                    onClick={() => {
+                      setActivePage(p.id);
+                      setShowPageDropdown(false);
+                    }}
+                  >
+                    <div className="truncate pr-2">
+                      <div className="font-semibold truncate">{p.name}</div>
+                      <div className="text-[9px] text-slate-500 font-mono">{p.slug}</div>
+                    </div>
+                    {p.id !== 'home' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deletePage(p.id);
+                          if (layout.activePageId === p.id) {
+                            setActivePage('home');
+                          }
+                        }}
+                        className="text-slate-500 hover:text-red-400 p-1"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <div className="w-full h-px bg-slate-850 my-1.5" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 px-2 block mb-1">System Templates</span>
+                {Object.values(layout.pages).filter(p => p.type === 'system').map((p) => (
+                  <div
+                    key={p.id}
+                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
+                      layout.activePageId === p.id ? 'bg-blue-600/15 text-blue-450 border border-blue-500/10' : 'text-slate-350 hover:bg-slate-905 hover:text-slate-200'
+                    }`}
+                    onClick={() => {
+                      setActivePage(p.id);
+                      setShowPageDropdown(false);
+                    }}
+                  >
+                    <div className="truncate">
+                      <div className="font-semibold truncate">{p.name}</div>
+                      <div className="text-[9px] text-slate-500 font-mono">{p.slug}</div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="w-full h-px bg-slate-855 my-1.5" />
+                <button
+                  onClick={() => {
+                    setShowAddPageModal(true);
+                    setShowPageDropdown(false);
+                  }}
+                  className="w-full py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-blue-400 hover:text-blue-300 rounded-lg text-xs font-bold text-center transition-all flex items-center justify-center space-x-1"
+                >
+                  <Plus size={12} />
+                  <span>Create Custom Page</span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -252,7 +365,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 required
                 value={importJsonText}
                 onChange={(e) => setImportJsonText(e.target.value)}
-                placeholder='Paste Figma JSON here (e.g. {"id": "my_page", "sections": [...]})'
+                placeholder='Paste Figma JSON here (e.g. {"id": "my_page", "pages": {...}})'
                 className="w-full h-48 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
               {importError && (
@@ -278,6 +391,70 @@ export const Topbar: React.FC<TopbarProps> = ({
               >
                 <Upload size={14} />
                 <span>Import Layout</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Add Page Modal */}
+      {showAddPageModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+          <form onSubmit={handleCreatePage} className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+              <div>
+                <h3 className="font-bold text-base text-white">Create Custom Page</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Add a new designable page to your storefront.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddPageModal(false)}
+                className="text-slate-400 hover:text-white text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-[10px] text-zinc-500 block mb-1">Page Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. About Us"
+                  value={newPageName}
+                  onChange={(e) => {
+                    setNewPageName(e.target.value);
+                    // Auto-generate slug
+                    setNewPageSlug('/' + e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-zinc-500 block mb-1">URL Path (Slug)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. /about"
+                  value={newPageSlug}
+                  onChange={(e) => setNewPageSlug(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="p-5 border-t border-slate-800 flex justify-end space-x-3 bg-slate-950">
+              <button
+                type="button"
+                onClick={() => setShowAddPageModal(false)}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-sm transition-all"
+              >
+                Create Page
               </button>
             </div>
           </form>

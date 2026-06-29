@@ -197,9 +197,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [selectedParentLinkId, setSelectedParentLinkId] = useState<string>('');
 
   // Find selected block & section details
+  const activeSections = layout.pages[layout.activePageId]?.sections || [];
   let selectedBlock: Block | null = null;
   let selectedBlockSection: Section | null = null;
-  for (const s of layout.sections) {
+  for (const s of activeSections) {
     const b = s.blocks.find((blk) => blk.id === selectedBlockId);
     if (b) {
       selectedBlock = b;
@@ -207,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       break;
     }
   }
-  const selectedSection = layout.sections.find((s) => s.id === selectedSectionId);
+  const selectedSection = activeSections.find((s) => s.id === selectedSectionId);
 
   const handleCodeChange = (value: string | undefined) => {
     if (!value) return;
@@ -391,11 +392,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Layers size={13} className="mr-1.5 text-blue-500" />
               Page Hierarchy
             </h3>
-            {layout.sections.length === 0 ? (
+            {activeSections.length === 0 ? (
               <p className="text-xs text-slate-500 italic">No layers yet. Add a section.</p>
             ) : (
               <div className="space-y-3">
-                {layout.sections.map((section) => (
+                {activeSections.map((section) => (
                   <div key={section.id} className="border-l border-slate-800 pl-2 space-y-1.5">
                     <div
                       onClick={() => {

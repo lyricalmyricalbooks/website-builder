@@ -514,7 +514,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         }}
         className="relative w-full max-w-[1280px] bg-white shadow-2xl transition-shadow duration-300"
       >
-        {layout.sections.map((section) => {
+        {(layout.pages[layout.activePageId]?.sections || []).map((section) => {
           const isSecSelected = selectedSectionId === section.id;
 
           return (
@@ -576,7 +576,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
           );
         })}
 
-        {layout.sections.length === 0 && (
+        {(layout.pages[layout.activePageId]?.sections || []).length === 0 && (
           <div className="py-32 text-center text-gray-400">
             <p className="text-lg">Your canvas is empty.</p>
             <p className="text-sm mt-2">Add a section from the left sidebar to get started.</p>
