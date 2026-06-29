@@ -582,7 +582,13 @@ export default function StorefrontHome() {
   return (
     <div className="w-full min-h-screen bg-black relative">
       {/* Floating Call to Action to enter Editor */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
+        <Link
+          href="/studio"
+          className="px-5 py-2.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-850 text-white text-sm font-semibold shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center space-x-1.5 backdrop-blur-sm"
+        >
+          <span>🍇 Open GrapesJS Studio</span>
+        </Link>
         <Link
           href="/editor"
           className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-500 text-white text-sm font-semibold shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center space-x-1.5"

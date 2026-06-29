@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   Monitor, Smartphone, Undo2, Redo2, ZoomIn, ZoomOut, 
   Download, Upload, Eye, Edit3, Trash2, Plus 
@@ -279,6 +280,14 @@ export const Topbar: React.FC<TopbarProps> = ({
             {isPreview ? <Edit3 size={14} /> : <Eye size={14} />}
             <span>{isPreview ? 'Back to Edit' : 'Preview'}</span>
           </button>
+
+          {/* Open GrapesJS Studio */}
+          <Link
+            href="/studio"
+            className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-350 hover:bg-slate-750 hover:text-slate-200 flex items-center space-x-1.5 text-xs font-semibold shadow-sm transition-all"
+          >
+            <span>🍇 GrapesJS Studio</span>
+          </Link>
 
           {/* Import Figma */}
           <button
