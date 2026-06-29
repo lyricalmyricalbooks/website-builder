@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react';
 import { 
   Plus, Layers, Palette, Code2, Trash2, Copy, LayoutGrid, 
   Type, Image, PlaySquare, ShoppingBag, Sparkles, Layers3,
-  Compass, Link as LinkIcon, Globe
+  Compass, Link as LinkIcon, Globe, Settings
 } from 'lucide-react';
 import { PageLayout, Section, Block, ThemeSettings, NavigationLink } from '@/types/editor';
 import { transpileTypeScript } from '@/lib/compiler';
@@ -35,6 +35,54 @@ interface SidebarProps {
   updateNavigationLink: (id: string, label: string, url: string) => void;
 }
 
+const THEME_PRESETS = {
+  editorial: {
+    name: 'Editorial Minimalist (Lyricalmyrical)',
+    colors: {
+      primary: '#F61515',
+      secondary: '#111111',
+      background: '#000000',
+      text: '#F9F9F9',
+      buttonBg: '#FBFBFB',
+      buttonText: '#020202',
+    },
+    typography: {
+      headingFont: 'Playfair Display',
+      bodyFont: 'DM Sans',
+    }
+  },
+  sleek_dark: {
+    name: 'Sleek Dark & Glassmorphism',
+    colors: {
+      primary: '#3b82f6',
+      secondary: '#1e1e2f',
+      background: '#0b0f19',
+      text: '#e2e8f0',
+      buttonBg: '#3b82f6',
+      buttonText: '#ffffff',
+    },
+    typography: {
+      headingFont: 'Inter',
+      bodyFont: 'Inter',
+    }
+  },
+  organic_warm: {
+    name: 'Organic Warm & Craft',
+    colors: {
+      primary: '#c2410c',
+      secondary: '#1e3a1e',
+      background: '#fbfaf7',
+      text: '#1c1917',
+      buttonBg: '#1c1917',
+      buttonText: '#fbfaf7',
+    },
+    typography: {
+      headingFont: 'Lora',
+      bodyFont: 'DM Sans',
+    }
+  }
+};
+
 export const Sidebar: React.FC<SidebarProps> = ({
   layout,
   breakpoint,
@@ -60,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   updateNavigationLink,
 }) => {
   const [activeTab, setActiveTab] = useState<'add' | 'layers' | 'theme' | 'code' | 'nav'>('add');
-  const [selectedCustomComponent, setSelectedCustomComponent] = useState<string>('CustomFeatureCard');
+  const [selectedCustomComponent, setSelectedCustomComponent] = useState<string>('BookHighlightCard');
   const [codeError, setCodeError] = useState<string | null>(null);
 
   // Nav link inputs
@@ -99,6 +147,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setNewLinkLabel('');
     setNewLinkUrl('');
     setSelectedParentLinkId('');
+  };
+
+  const applyThemePreset = (presetKey: keyof typeof THEME_PRESETS) => {
+    const preset = THEME_PRESETS[presetKey];
+    updateTheme({
+      colors: preset.colors,
+      typography: preset.typography,
+    });
   };
 
   // Render navigation links recursively in a tree view
@@ -183,7 +239,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     { type: 'button', label: 'Button Block', icon: <PlaySquare size={14} /> },
                     { type: 'product-card', label: 'Product Card', icon: <ShoppingBag size={14} /> },
                     { type: 'search', label: 'Predictive Search', icon: <PlaySquare size={14} /> },
-                    { type: 'custom', label: 'Custom Widget', icon: <Sparkles size={14} />, customName: 'CustomFeatureCard' },
+                    { type: 'group', label: 'Container Card', icon: <Layers size={14} /> },
+                    { type: 'custom', label: 'Custom Widget', icon: <Sparkles size={14} />, customName: 'BookHighlightCard' },
                   ].map((item) => (
                     <button
                       key={item.type}
@@ -264,8 +321,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <div className="flex items-center space-x-1">
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
-                                duplicateBlock(block.id);
+                                  e.stopPropagation();
+                                  duplicateBlock(block.id);
                               }}
                               className="text-slate-500 hover:text-slate-300"
                               title="Duplicate"
@@ -295,6 +352,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {activeTab === 'theme' && (
           <div className="space-y-6">
+            {/* Global Theme Presets */}
+            <div className="bg-slate-850 p-3 rounded-xl border border-slate-800">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center">
+                <Sparkles size={13} className="mr-1.5 text-blue-500" />
+                Global Theme Presets
+              </h3>
+              <p className="text-[10px] text-slate-400 mb-3">Apply a curated design system preset instantly.</p>
+              <select
+                onChange={(e) => applyThemePreset(e.target.value as any)}
+                className="w-full bg-slate-900 border border-slate-750 text-xs px-2 py-1.5 rounded-lg focus:outline-none text-slate-200 font-medium"
+                defaultValue=""
+              >
+                <option value="" disabled>-- Select Theme Preset --</option>
+                {Object.entries(THEME_PRESETS).map(([key, p]) => (
+                  <option key={key} value={key}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center">
                 <Palette size={13} className="mr-1.5 text-blue-500" />
@@ -324,6 +400,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Typography */}
+            <div className="border-t border-slate-800 pt-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Global Typography</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Heading Font</label>
+                  <select
+                    value={layout.theme.typography.headingFont}
+                    onChange={(e) => updateTheme({ typography: { ...layout.theme.typography, headingFont: e.target.value } })}
+                    className="w-full bg-slate-850 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                  >
+                    <option value="Playfair Display">Playfair Display (Editorial Serif)</option>
+                    <option value="Lora">Lora (Elegant Serif)</option>
+                    <option value="Inter">Inter (Sleek Sans)</option>
+                    <option value="DM Sans">DM Sans (Minimalist Sans)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Body Font</label>
+                  <select
+                    value={layout.theme.typography.bodyFont}
+                    onChange={(e) => updateTheme({ typography: { ...layout.theme.typography, bodyFont: e.target.value } })}
+                    className="w-full bg-slate-850 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                  >
+                    <option value="DM Sans">DM Sans (Minimalist Sans)</option>
+                    <option value="Inter">Inter (Sleek Sans)</option>
+                    <option value="Lora">Lora (Elegant Serif)</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -457,7 +565,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onChange={(e) => setSelectedCustomComponent(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 focus:outline-none text-slate-200"
               >
-                <option value="CustomFeatureCard">Feature Card</option>
+                <option value="BookHighlightCard">Feature Card</option>
               </select>
             </div>
 
@@ -466,7 +574,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 height="100%"
                 language="typescript"
                 theme="vs-dark"
-                value={layout.customComponents[selectedCustomComponent]}
+                value={layout.customComponents[selectedCustomComponent] || ''}
                 onChange={handleCodeChange}
                 options={{
                   minimap: { enabled: false },
@@ -595,6 +703,68 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <option value="text-5xl">Heading 1 (5XL)</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Font Family</label>
+                    <select
+                      value={selectedBlock.settings.fontFamily || 'default'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { fontFamily: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="default">Theme Default</option>
+                      <option value="font-serif">Playfair / Lora (Serif)</option>
+                      <option value="font-sans">DM Sans / Inter (Sans)</option>
+                      <option value="font-mono">Monospace</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Letter Spacing</label>
+                    <select
+                      value={selectedBlock.settings.letterSpacing || 'tracking-normal'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { letterSpacing: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="tracking-tighter">Tighter</option>
+                      <option value="tracking-normal">Normal</option>
+                      <option value="tracking-wide">Wide</option>
+                      <option value="tracking-widest">Widest</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Line Height</label>
+                    <select
+                      value={selectedBlock.settings.lineHeight || 'leading-relaxed'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { lineHeight: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="leading-none">None</option>
+                      <option value="leading-normal">Normal</option>
+                      <option value="leading-relaxed">Relaxed</option>
+                      <option value="leading-loose">Loose</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Text Transform</label>
+                    <select
+                      value={selectedBlock.settings.textTransform || 'normal-case'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { textTransform: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="normal-case">None</option>
+                      <option value="uppercase">UPPERCASE</option>
+                      <option value="lowercase">lowercase</option>
+                      <option value="capitalize">Capitalize</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Text Color</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. #ff0000 or text-red-500"
+                      value={selectedBlock.settings.color || ''}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { color: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -620,6 +790,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <option value="cover">Cover (Fill & Crop)</option>
                       <option value="contain">Contain (Fit Entire)</option>
                       <option value="fill">Fill (Stretch)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Image Filter</label>
+                    <select
+                      value={selectedBlock.settings.filter || 'none'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { filter: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="none">None</option>
+                      <option value="grayscale">Grayscale</option>
+                      <option value="blur">Soft Blur</option>
+                      <option value="darken">Darken (Brightness 50%)</option>
+                      <option value="grayscale-darken">Grayscale + Darken</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Color Overlay (Hex/RGBA)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. rgba(0,0,0,0.4)"
+                      value={selectedBlock.settings.overlayColor || ''}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { overlayColor: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Hover Zoom Effect</label>
+                    <select
+                      value={selectedBlock.settings.hoverEffect || 'none'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { hoverEffect: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="none">No Zoom</option>
+                      <option value="scale">Zoom on Hover</option>
                     </select>
                   </div>
                 </div>
@@ -648,6 +853,102 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <option value="secondary">Secondary</option>
                       <option value="outline">Outline</option>
                     </select>
+                  </div>
+                </div>
+              )}
+
+              {selectedBlock.type === 'group' && (
+                <div className="space-y-3">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Container Card Settings</h5>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Background Color/Gradient</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. #1e1e2f or linear-gradient(...)"
+                      value={selectedBlock.settings.backgroundColor || ''}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { backgroundColor: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Inner Padding</label>
+                    <select
+                      value={selectedBlock.settings.padding || 'p-0'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { padding: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="p-0">None (p-0)</option>
+                      <option value="p-2">Small (p-2)</option>
+                      <option value="p-4">Medium (p-4)</option>
+                      <option value="p-6">Large (p-6)</option>
+                      <option value="p-8">Extra Large (p-8)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Corner Radius</label>
+                    <select
+                      value={selectedBlock.settings.borderRadius || 'rounded-none'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { borderRadius: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="rounded-none">Square (none)</option>
+                      <option value="rounded-md">Medium (rounded-md)</option>
+                      <option value="rounded-lg">Large (rounded-lg)</option>
+                      <option value="rounded-xl">XL (rounded-xl)</option>
+                      <option value="rounded-2xl">2XL (rounded-2xl)</option>
+                      <option value="rounded-3xl">3XL (rounded-3xl)</option>
+                      <option value="rounded-full">Full (rounded-full)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Drop Shadow</label>
+                    <select
+                      value={selectedBlock.settings.shadow || 'shadow-none'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { shadow: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="shadow-none">None</option>
+                      <option value="shadow-sm">Small</option>
+                      <option value="shadow-md">Medium</option>
+                      <option value="shadow-lg">Large</option>
+                      <option value="shadow-xl">Extra Large</option>
+                      <option value="shadow-2xl">Double XL</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Backdrop Blur</label>
+                    <select
+                      value={selectedBlock.settings.backdropBlur || 'backdrop-blur-none'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { backdropBlur: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="backdrop-blur-none">None</option>
+                      <option value="backdrop-blur-sm">Light</option>
+                      <option value="backdrop-blur-md">Medium</option>
+                      <option value="backdrop-blur-lg">Strong</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Border Width</label>
+                    <select
+                      value={selectedBlock.settings.borderWidth || 'border-0'}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { borderWidth: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none text-slate-200"
+                    >
+                      <option value="border-0">None (0px)</option>
+                      <option value="border">Thin (1px)</option>
+                      <option value="border-2">Thick (2px)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-500 block">Border Color</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. #3b82f6"
+                      value={selectedBlock.settings.borderColor || ''}
+                      onChange={(e) => updateBlockSettings(selectedBlock!.id, { borderColor: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs px-2 py-1 rounded focus:outline-none"
+                    />
                   </div>
                 </div>
               )}

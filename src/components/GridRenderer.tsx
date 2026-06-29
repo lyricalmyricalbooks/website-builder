@@ -70,6 +70,37 @@ const AnimatedBlock: React.FC<AnimatedBlockProps> = ({
         return <ProductCardBlock settings={block.settings} theme={theme} />;
       case 'search':
         return <SearchBlock settings={block.settings} />;
+      case 'group': {
+        const {
+          backgroundColor = 'transparent',
+          padding = 'p-0',
+          borderRadius = 'rounded-none',
+          shadow = 'shadow-none',
+          backdropBlur = 'backdrop-blur-none',
+          borderColor = 'transparent',
+          borderWidth = 'border-0',
+        } = block.settings;
+
+        const isHexBg = backgroundColor.startsWith('#') || backgroundColor.startsWith('rgb') || backgroundColor.startsWith('rgba') || backgroundColor.startsWith('var') || backgroundColor.startsWith('linear-gradient');
+        const groupStyle: React.CSSProperties = {
+          background: isHexBg ? backgroundColor : undefined,
+          borderColor: borderColor !== 'transparent' ? borderColor : undefined,
+          borderStyle: borderWidth !== 'border-0' ? 'solid' : undefined,
+        };
+
+        return (
+          <div
+            className={`w-full h-full ${padding} ${borderRadius} ${shadow} ${backdropBlur} ${borderWidth} ${
+              !isHexBg && backgroundColor !== 'transparent' ? backgroundColor : ''
+            }`}
+            style={groupStyle}
+          >
+            {!isPreview && (
+              <div className="absolute inset-0 border border-dashed border-slate-800/30 pointer-events-none rounded-inherit" />
+            )}
+          </div>
+        );
+      }
       case 'custom':
         if (block.componentName && customComponents[block.componentName]) {
           const CustomComponent = executeCustomComponent(customComponents[block.componentName]);

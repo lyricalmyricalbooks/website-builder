@@ -8,6 +8,9 @@ interface TextBlockProps {
     color?: string; // hex or tailwind class
     alignment?: 'text-left' | 'text-center' | 'text-right' | 'text-justify';
     lineHeight?: string;
+    letterSpacing?: string;
+    textTransform?: string;
+    fontFamily?: string;
   };
   theme?: any;
 }
@@ -20,18 +23,34 @@ export const TextBlock: React.FC<TextBlockProps> = ({ settings, theme }) => {
     color = 'inherit',
     alignment = 'text-left',
     lineHeight = 'leading-relaxed',
+    letterSpacing = 'tracking-normal',
+    textTransform = 'normal-case',
+    fontFamily = 'default',
   } = settings;
 
-  // If color is hex, use it as inline style, otherwise use tailwind class
+  // Resolve font family overrides
+  let resolvedFontFamily = undefined;
+  if (fontFamily === 'font-serif') {
+    resolvedFontFamily = '"Playfair Display", "Lora", Georgia, serif';
+  } else if (fontFamily === 'font-sans') {
+    resolvedFontFamily = '"DM Sans", "Inter", sans-serif';
+  } else if (fontFamily === 'font-mono') {
+    resolvedFontFamily = 'monospace';
+  } else if (theme?.typography?.bodyFont) {
+    resolvedFontFamily = theme.typography.bodyFont === 'Playfair Display' || theme.typography.bodyFont === 'Lora'
+      ? `"${theme.typography.bodyFont}", Georgia, serif`
+      : `"${theme.typography.bodyFont}", sans-serif`;
+  }
+
   const isHexColor = color.startsWith('#') || color.startsWith('rgb') || color.startsWith('var');
   const textStyle: React.CSSProperties = {
     color: isHexColor ? color : undefined,
-    fontFamily: theme?.typography?.bodyFont ? `var(--font-${theme.typography.bodyFont.toLowerCase()}, inherit)` : undefined,
+    fontFamily: resolvedFontFamily,
   };
 
   return (
     <div
-      className={`w-full h-full p-2 ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${
+      className={`w-full h-full p-2 ${alignment} ${fontSize} ${fontWeight} ${lineHeight} ${letterSpacing} ${textTransform} ${
         !isHexColor && color !== 'inherit' ? color : ''
       }`}
       style={textStyle}
